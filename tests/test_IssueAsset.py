@@ -6,16 +6,16 @@ from tests.helpers import Helpers
 import os
 import pytest
 
-PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
+
 NAME = 'Issue' + time.strftime('%y%m%d')
-
 pw.setThrowOnError(True)
-pw.setNode(PYWAVES_TEST_NODE, 'T')
-
 helpers = Helpers()
-testwallet = helpers.prepareTestcase(101000000)
 
 try:
+    def test_prepareTestcase():
+        global testwallet
+        testwallet = helpers.prepareTestcase(101000000)
+        assert testwallet is not None
 
     def test_issueAssetWithoutPrivateKey():
         with pytest.raises(Exception) as error:

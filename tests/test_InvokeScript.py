@@ -6,27 +6,32 @@ import pytest
 import os  
 
 
-PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
-
 pw.setThrowOnError(True)
-pw.setNode(PYWAVES_TEST_NODE, 'T')
 helpers = Helpers()
-testwallet = helpers.prepareTestcase(100000000, sendTokens=True)
 
-seed = pw.b58encode(os.urandom(32))
-address1 = address.Address(seed=seed)
-
-seed = pw.b58encode(os.urandom(32))
-dappaddress1 = address.Address(seed=seed)
-
-# fund dappaddress1
-tx = testwallet.sendWaves(dappaddress1, 1000000)
-pw.waitFor(tx['id'])
-
-assets = testwallet.assets()
-myToken = assets[0]
 
 try:
+
+    def test_prepareTestcase():
+        global testwallet, address1, dappaddress1, myToken
+        testwallet = helpers.prepareTestcase(100000000, sendTokens=True)
+        seed = pw.b58encode(os.urandom(32))
+        address1 = address.Address(seed=seed)
+
+        seed = pw.b58encode(os.urandom(32))
+        dappaddress1 = address.Address(seed=seed)
+
+        # fund dappaddress1
+        tx = testwallet.sendWaves(dappaddress1, 1000000)
+        pw.waitFor(tx['id'])
+
+        assets = testwallet.assets()
+        myToken = assets[0]
+
+        assert testwallet is not None
+        assert address1 is not None
+        assert dappaddress1 is not None
+        assert myToken is not None
 
     def test_invokeScriptWithoutPrivateKey():
         myAddress = address.Address(address1.address)

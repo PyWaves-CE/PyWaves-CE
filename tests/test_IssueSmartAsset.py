@@ -7,20 +7,21 @@ import os
 import random
 import string
 
-PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
-
 pw.setThrowOnError(True)
-pw.setNode(PYWAVES_TEST_NODE, 'T')
 helpers = Helpers()
 
-seed = pw.b58encode(os.urandom(32))
-address1 = address.Address(seed=seed)
-
-assetName = ''.join(random.choices(string.ascii_lowercase, k=8))
-
-testwallet = helpers.prepareTestcase(101000000)
-
 try: 
+    def test_prepareTestcase():
+        global testwallet, address1, assetName
+        testwallet = helpers.prepareTestcase(101000000)
+        seed = pw.b58encode(os.urandom(32))
+        address1 = address.Address(seed=seed)
+        assetName = ''.join(random.choices(string.ascii_lowercase, k=8))
+
+        assert testwallet is not None
+        assert address1 is not None
+        assert assetName is not None
+
     def test_issueSmartAssetWithoutPrivateKey():
         myAddress = address.Address(address1.address)
         script = 'match tx { \n' + \

@@ -6,15 +6,15 @@ from random import randint
 from tests.helpers import Helpers
 import os
 
-PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
 pw.setThrowOnError(True)
-pw.setNode(PYWAVES_TEST_NODE, 'T')
-
 helpers = Helpers()
-testwallet = helpers.prepareTestcase(sendTokens=True)
 
 try:
-    
+    def test_prepareTestcase():
+        global testwallet
+        testwallet = helpers.prepareTestcase(sendTokens=True)
+        assert testwallet is not None
+
     def test_succesfullBurnAsset():
         tokens = testwallet.assets()
         myToken = asset.Asset(tokens[0])

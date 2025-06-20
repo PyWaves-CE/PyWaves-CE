@@ -6,17 +6,23 @@ import pytest
 import os
 
 pw.setThrowOnError(True)
-
 helpers = Helpers()
-testwallet = helpers.prepareTestcase()
 
-seed = pw.b58encode(os.urandom(32))
-leasingAddress = address.Address(seed=seed)
-seed = pw.b58encode(os.urandom(32))
-leasingAddressWithNoBalance = address.Address(seed=seed)
-leasingId = pw.b58encode(os.urandom(32))
 
 try:
+    def test_prepareTestcase():
+        global testwallet, leasingAddress, leasingAddressWithNoBalance, leasingId
+        testwallet = helpers.prepareTestcase()
+        seed = pw.b58encode(os.urandom(32))
+        leasingAddress = address.Address(seed=seed)
+        seed = pw.b58encode(os.urandom(32))
+        leasingAddressWithNoBalance = address.Address(seed=seed)
+        leasingId = pw.b58encode(os.urandom(32))
+
+        assert testwallet is not None
+        assert leasingAddress is not None
+        assert leasingAddressWithNoBalance is not None
+        assert leasingId is not None
 
     def test_cancelWithoutPrivateKey():
         myAddress = address.Address('3MpvqThrQUCC1DbkY9sMmo4fp77e2h11NaM')
