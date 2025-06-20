@@ -8,6 +8,10 @@ import pytest
 
 
 NAME = 'Issue' + time.strftime('%y%m%d')
+<<<<<<< HEAD
+=======
+pw.setThrowOnError(True)
+>>>>>>> 56ed669 (WIP)
 helpers = Helpers()
 
 try:
