@@ -7,10 +7,6 @@ import os
 import random
 import string
 
-<<<<<<< HEAD
-=======
-pw.setThrowOnError(True)
->>>>>>> 56ed669 (WIP)
 helpers = Helpers()
 
 try: 

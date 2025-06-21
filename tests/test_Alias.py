@@ -6,10 +6,6 @@ import string
 import pytest
 import os
 
-<<<<<<< HEAD
-=======
-pw.setThrowOnError(True)
->>>>>>> 56ed669 (WIP)
 helpers = Helpers()
 
 try:
