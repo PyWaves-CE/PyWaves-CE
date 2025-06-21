@@ -5,15 +5,15 @@ import os
 from tests.helpers import Helpers
 import pytest
 
-PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
-
 pw.setThrowOnError(True)
-pw.setNode(PYWAVES_TEST_NODE, 'T')
-
 helpers = Helpers()
-testwallet = helpers.prepareTestcase()
 
 try:
+
+    def test_prepareTestcase():
+        global testwallet
+        testwallet = helpers.prepareTestcase()
+        assert testwallet is not None
 
     def test_sendWaveswithoutPrivateKey():
         myAddress = address.Address('3MwGH6GPcq7jiGNXgS4K6buynpLZR5LAgQm')

@@ -7,14 +7,21 @@ import os
 
 pw.setThrowOnError(True)
 helpers = Helpers()
-testwallet = helpers.prepareTestcase()
-
-seed = pw.b58encode(os.urandom(32))
-recipient1 = address.Address(seed=seed)
-seed = pw.b58encode(os.urandom(32))
-recipient2 = address.Address(seed=seed)
 
 try:
+    def test_prepareTestcase():
+        global testwallet, recipient1, recipient2
+        testwallet = helpers.prepareTestcase()
+        seed = pw.b58encode(os.urandom(32))
+        recipient1 = address.Address(seed=seed)
+        seed = pw.b58encode(os.urandom(32))
+        recipient2 = address.Address(seed=seed)
+
+        assert testwallet is not None
+        assert recipient1 is not None
+        assert recipient2 is not None
+
+
     def test_massTransferWithoutPrivateKey():
         myAddress = address.Address('3MwGH6GPcq7jiGNXgS4K6buynpLZR5LAgQm')
         transfers = [

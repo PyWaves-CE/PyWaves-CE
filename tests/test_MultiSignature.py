@@ -7,24 +7,24 @@ from pywaves.txSigner import TxSigner
 from pywaves.txGenerator import TxGenerator
 import os
 
-PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
-
 pw.setThrowOnError(True)
-pw.setNode(PYWAVES_TEST_NODE, 'T')
-
 helpers = Helpers()
-testwallet = helpers.prepareTestcase(200000000)
-
-seed = pw.b58encode(os.urandom(32))
-multisigAddress = address.Address(seed=seed)
-print(seed)
-seed = pw.b58encode(os.urandom(32))
-address1 = address.Address(seed=seed)
-
-seed = pw.b58encode(os.urandom(32))
-address2 = address.Address(seed=seed)
 
 try:
+    def test_prepareTestcase():
+        global testwallet, multisigAddress, address1, address2
+        testwallet = helpers.prepareTestcase(200000000)
+        seed = pw.b58encode(os.urandom(32))
+        multisigAddress = address.Address(seed=seed)
+        seed = pw.b58encode(os.urandom(32))
+        address1 = address.Address(seed=seed)
+        seed = pw.b58encode(os.urandom(32))
+        address2 = address.Address(seed=seed)
+
+        assert testwallet is not None
+        assert multisigAddress is not None
+        assert address1 is not None
+        assert address2 is not None
 
     def test_createMultiSignatureAddress():
 

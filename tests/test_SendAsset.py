@@ -9,16 +9,19 @@ PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
 PYWAVES_TEST_SECRET = os.getenv('PYWAVES_TEST_SECRET')
 pw.setThrowOnError(True)
 pw.setNode(PYWAVES_TEST_NODE, 'T')
-
 helpers = Helpers()
-testwallet = helpers.prepareTestcase(sendTokens=True)
-
-# use test asset
-faucet = address.Address(privateKey=PYWAVES_TEST_SECRET)
-assets = faucet.assets()
-myToken = asset.Asset(assets[0])
 
 try:
+    def test_prepareTestcase():
+        global testwallet, myToken
+        testwallet = helpers.prepareTestcase(sendTokens=True)
+        faucet = address.Address(privateKey=PYWAVES_TEST_SECRET)
+        assets = faucet.assets()
+        myToken = asset.Asset(assets[0])
+        
+        assert testwallet is not None
+        assert myToken is not None
+
 
     # no need to use testwallet, just use the address
     def test_assetTransactionWithoutPrivateKey():

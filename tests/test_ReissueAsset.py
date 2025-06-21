@@ -6,18 +6,18 @@ import os
 
 PYWAVES_TEST_SECRET = os.getenv('PYWAVES_TEST_SECRET')
 PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
-
-pw.setThrowOnError(True)
 pw.setNode(PYWAVES_TEST_NODE, 'T')
 
+pw.setThrowOnError(True)
 helpers = Helpers()
-faucet = address.Address(privateKey=PYWAVES_TEST_SECRET)
 
-# use test asset
-# don't need to create a test wallet, just use faucet
-
-assets = faucet.assets()
-myToken = asset.Asset(assets[0])
+def test_prepareTestcase():
+    global faucet, myToken
+    faucet = address.Address(privateKey=PYWAVES_TEST_SECRET)
+    assets = faucet.assets()
+    myToken = asset.Asset(assets[0])
+    assert faucet is not None
+    assert myToken is not None
 
 def test_succesfullReissueAsset():
     tx = faucet.reissueAsset(myToken, 10, reissuable=True)
