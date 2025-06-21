@@ -13,9 +13,6 @@ pw.setThrowOnError(True)
 pw.setNode(PYWAVES_TEST_NODE, 'T')
 helpers = Helpers()
 
-# This test case uses directly the faucet in order to save WAVES
-
-
 try:
 
     def test_prepareTestcase():

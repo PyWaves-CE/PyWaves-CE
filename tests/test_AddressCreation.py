@@ -5,7 +5,6 @@ import os
 from tests.helpers import Helpers
 
 PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
-
 pw.setThrowOnError(True)
 pw.setNode(PYWAVES_TEST_NODE, 'T')
 helpers = Helpers()

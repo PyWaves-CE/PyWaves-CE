@@ -6,11 +6,9 @@ import os
 import random
 import string
 
-
 pw.setThrowOnError(True)
 helpers = Helpers()
 
-    
 try:
 
     def test_prepareTestcase():
@@ -21,7 +19,7 @@ try:
         assetName = ''.join(random.choices(string.ascii_lowercase, k=8))
         token = testwallet.issueAsset(assetName, f"Test Token {assetName}", 100*(10**8), 8, reissuable=True)
         pw.waitFor(token['id'])
-        
+
         assert testwallet is not None
         assert address1 is not None
         assert token is not None

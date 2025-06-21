@@ -7,7 +7,6 @@ import os
 PYWAVES_TEST_SECRET = os.getenv('PYWAVES_TEST_SECRET')
 PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
 pw.setNode(PYWAVES_TEST_NODE, 'T')
-
 pw.setThrowOnError(True)
 helpers = Helpers()
 

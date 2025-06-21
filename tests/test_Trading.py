@@ -9,16 +9,20 @@ import time
 
 PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
 PYWAVES_TEST_MATCHER = 'https://testnet.waves.exchange/api/v1/forward/matcher'
-
 pw.setThrowOnError(True)
 pw.setNode(PYWAVES_TEST_NODE, 'T')
 pw.setMatcher(PYWAVES_TEST_MATCHER)
 helpers = Helpers()
-testwallet = helpers.prepareTestcase(200000000, sendTokens=True)
-tokens = testwallet.assets()
-A_B = asset.AssetPair(asset.Asset(tokens[0]), asset.Asset(assetId=''))
         
 try:
+    def test_prepareTestcase():
+        global testwallet, tokens, A_B
+        testwallet = helpers.prepareTestcase(200000000, sendTokens=True)
+        tokens = testwallet.assets()
+        A_B = asset.AssetPair(asset.Asset(tokens[0]), asset.Asset(assetId=''))
+        assert testwallet is not None
+        assert tokens is not None
+        assert A_B is not None
 
     def test_orderWithoutStatus():
         orderId = '9JtTmjBqYvrkLuEPmHAJCfuc3cM2FzRNdxH7YKrpz1'
@@ -30,9 +34,9 @@ try:
         assert str(error) == '<ExceptionInfo PyWavesException(\'Order not found\') tblen=3>'
 
     def test_deleteOrderFilled():
-        order1 = testwallet.sell(A_B, amount=1, price=1)
+        order1 = testwallet.sell(A_B, amount=1, price=1, maxLifetime=15*86400)
         time.sleep(1)
-        order2 = testwallet.buy(A_B, amount=1, price=1)
+        order2 = testwallet.buy(A_B, amount=1, price=1, maxLifetime=15*86400)
         time.sleep(1)
         with pytest.raises(Exception) as error:
             testwallet.cancelOrder(A_B, order1)
@@ -41,7 +45,7 @@ try:
 
     # place sell orders
     def test_succesfullSellOrder():
-        order = testwallet.sell(A_B, amount=1, price=2)
+        order = testwallet.sell(A_B, amount=1, price=2, maxLifetime=15*86400)
         orderStatus = order.status()
         assert orderStatus == 'Accepted'
 
@@ -53,14 +57,14 @@ try:
 
     # buy the previous order
     def test_succesfullBuyOrder():        
-        order = testwallet.buy(A_B, amount=1, price=2)
+        order = testwallet.buy(A_B, amount=1, price=2, maxLifetime=15*86400)
         
         orderStatus = order.status()
         assert orderStatus == 'Filled'
 
     def test_cancelAllOrders():
-        order1 = testwallet.sell(A_B, amount=1, price=3)
-        order2 = testwallet.sell(A_B, amount=1, price=4)
+        order1 = testwallet.sell(A_B, amount=1, price=3, maxLifetime=15*86400)
+        order2 = testwallet.sell(A_B, amount=1, price=4, maxLifetime=15*86400)
         time.sleep(1)
         testwallet.cancelOpenOrders(A_B)
         time.sleep(1)
@@ -68,7 +72,7 @@ try:
         assert order1.status() == 'Cancelled' and order2.status() == 'Cancelled'
 
     def test_cancelOrderById():
-        order = testwallet.sell(A_B, amount=1, price=5)
+        order = testwallet.sell(A_B, amount=1, price=5, maxLifetime=15*86400)
         time.sleep(1)
         testwallet.cancelOrderByID(A_B, order.orderId)
         time.sleep(1)
