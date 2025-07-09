@@ -139,7 +139,6 @@ class AssetPair(object):
         if len(args)==1:
             limit = args[0]
             if limit > 0 and limit <= self.pywaves.MAX_WDF_REQUEST:
-                #return self._getMarketData('/api/trades/', '%d' % limit)
                 return self._getAPIData('/v0/transactions/exchange?amountAsset=' + amountAssetId + '&priceAsset=' + priceAssetId + '&limit=' + str(limit))
             else:
                 raise PyWavesException('Invalid request. Limit must be >0 and <= 100')
@@ -153,9 +152,8 @@ class AssetPair(object):
         if len(args)==2:
             timeframe = args[0]
             limit = args[1]
-            if timeframe not in self.pywaves.VALID_TIMEFRAMES:
-                raise PyWavesException('Invalid timeframe')
-            elif limit > 0 and limit <= self.pywaves.MAX_WDF_REQUEST:
+            self.pywaves.timefraneMustBeValid(timeframe)
+            if limit > 0 and limit <= self.pywaves.MAX_WDF_REQUEST:
                 return self._getMarketData('/candles', '%d/%d' % (timeframe, limit))
             else:
                 raise PyWavesException('Invalid request. Limit must be >0 and <= 100')
@@ -163,8 +161,7 @@ class AssetPair(object):
             timeframe = args[0]
             fromTimestamp = args[1]
             toTimestamp = args[2]
-            if timeframe not in self.pywaves.VALID_TIMEFRAMES:
-                raise PyWavesException('Invalid timeframe')
+            self.pywaves.timefraneMustBeValid(timeframe)
             else:
                 return self._getMarketData('/candles', '%d/%d/%d' % (timeframe, fromTimestamp, toTimestamp))
 

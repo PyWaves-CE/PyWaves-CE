@@ -108,6 +108,18 @@ def assetMustBeIssued(self, asset):
     if not self.OFFLINE and asset and not asset.status():
         raise PyWavesException('Asset not issued')
 
+def timefraneMustBeValid(timeframe):
+    if timeframe not in VALID_TIMEFRAMES:
+        raise PyWavesException('Invalid timeframe')
+
+def assetNameMustBeValid(name):
+    if len(name) < 4 or len(name) > 16:
+        raise PyWavesException('Asset name must be between 4 and 16 characters long')
+
+def tooManyRecipientsForMassTransfer(recipients):
+    if len(recipients) > 100:
+        raise PyWavesException('Too many recipients')
+
 def setOffline():
     global OFFLINE
     OFFLINE = True

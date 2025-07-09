@@ -318,15 +318,13 @@ class Address(object):
 
     def issueAsset(self, name, description, quantity, decimals=0, reissuable=False, txFee=pw.DEFAULT_ASSET_FEE, timestamp=0):
         self.pywaves.requirePrivateKey(self)
-        if len(name) < 4 or len(name) > 16:
-            raise PyWavesException('Asset name must be between 4 and 16 characters long')            
-        else:
-            if timestamp == 0:
-                timestamp = int(time.time() * 1000)
-            tx = self.txGenerator.generateIssueAsset(name, description, quantity, self.publicKey, decimals, reissuable, txFee, timestamp)
-            self.txSigner.signTx(tx, self.privateKey)
-            return self.broadcastTx(tx)
-            
+        self.pywaves.assetNameMustBeValid(name)
+        if timestamp == 0:
+            timestamp = int(time.time() * 1000)
+        tx = self.txGenerator.generateIssueAsset(name, description, quantity, self.publicKey, decimals, reissuable, txFee, timestamp)
+        self.txSigner.signTx(tx, self.privateKey)
+        return self.broadcastTx(tx)
+        
     def reissueAsset(self, asset, quantity, reissuable=False, txFee=pw.DEFAULT_TX_FEE, timestamp=0):
         if timestamp == 0:
             timestamp = int(time.time() * 1000)
@@ -372,9 +370,8 @@ class Address(object):
             totalAmount += transfers[i]['amount']
 
         self.pywaves.requirePrivateKey(self)
-        if len(transfers) > 100:
-            raise PyWavesException('Too many recipients')
-        elif not self.pywaves.OFFLINE and self.balance() < totalAmount + txFee:
+        self.pywaves.tooManyRecipientsForMassTransfer(transfers)
+        if not self.pywaves.OFFLINE and self.balance() < totalAmount + txFee:
             raise PyWavesException('Insufficient Waves balance')
         else:
             if timestamp == 0:
@@ -426,9 +423,9 @@ class Address(object):
         for transfer in transfers:
             totalAmount += transfer['amount']
         self.pywaves.requirePrivateKey(self)
-        if len(transfers) > 100:
-            raise PyWavesException('Too many recipients')
-        elif not self.pywaves.OFFLINE and self.balance() < txFee:
+        self.pywaves.tooManyRecipientsForMassTransfer(transfers)
+        
+        if not self.pywaves.OFFLINE and self.balance() < txFee:
             raise PyWavesException('Insufficient Waves balance')
         if not self.pywaves.OFFLINE and self.balance(assetId=asset.assetId) < totalAmount:
             raise PyWavesException('Insufficient Asset balance')
@@ -712,9 +709,7 @@ class Address(object):
             raise PyWavesException('PyWaves currently offline')
         script = self.pywaves.wrapper('/utils/script/compileCode', scriptSource)['script'][7:]
         self.pywaves.requirePrivateKey(self)
-        if len(name) < 4 or len(name) > 16:
-            raise PyWavesException('Asset name must be between 4 and 16 characters long')
-        else:
+        self.pywaves.assetNameMustBeValid(name)
             '''compiledScript = base64.b64decode(script)
             scriptLength = len(compiledScript)'''
             if timestamp == 0:
