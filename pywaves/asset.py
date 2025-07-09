@@ -163,7 +163,12 @@ class AssetPair(object):
             fromTimestamp = args[1]
             toTimestamp = args[2]
             self.pywaves.timefraneMustBeValid(timeframe)
+<<<<<<< HEAD
             return self._getMarketData('/candles', '%d/%d/%d' % (timeframe, fromTimestamp, toTimestamp))
+=======
+            else:
+                return self._getMarketData('/candles', '%d/%d/%d' % (timeframe, fromTimestamp, toTimestamp))
+>>>>>>> 1c69ea1 (WIP)
 
     __repr__ = __str__
 
