@@ -27,7 +27,7 @@ DEFAULT_CURRENCY = 'WAVES'
 VALID_TIMEFRAMES = (5, 15, 30, 60, 240, 1440)
 MAX_WDF_REQUEST = 100
 
-THROW_EXCEPTION_ON_ERROR = False
+#THROW_EXCEPTION_ON_ERROR = False
 
 import requests
 import base58
@@ -73,20 +73,34 @@ logging.basicConfig(
 logging.getLogger("pywaves").setLevel(logging.INFO)
 logging.getLogger("requests").setLevel(logging.WARNING)
 
-
+'''
+#TODO: Remove this class and use the one below
 class PyWavesException(ValueError):
     pass
+'''
 
+class PyWavesException(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+        logging.error("An exception occurred: " + msg)
+        super().__init__(msg)
 
+#TODO: Remove this function
 def throw_error(msg):
-    if THROW_EXCEPTION_ON_ERROR:
-        raise PyWavesException(msg)
+    raise PyWavesException(msg)
 
-
+'''
+#TODO: Remove this function
 def setThrowOnError(throw=True):
     global THROW_EXCEPTION_ON_ERROR
     THROW_EXCEPTION_ON_ERROR = throw
+'''
 
+def requirePrivateKey(self):
+    if not self.privateKey:
+        msg = 'Private key required'
+        logging.error(msg)
+        raise PyWavesException(msg)
 
 def setOffline():
     global OFFLINE

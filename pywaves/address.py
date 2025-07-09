@@ -350,16 +350,11 @@ class Address(object):
         
     def broadcastTx(self, tx):
         data = json.dumps(tx)
-
         return self.pywaves.wrapper('/transactions/broadcast', data)
 
     def sendWaves(self, recipient, amount, attachment='', txFee=pw.DEFAULT_TX_FEE, timestamp=0):
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-
-        elif amount <= 0:
+        self.pywaves.requirePrivateKey(self)
+        if amount <= 0:
             msg = 'Amount must be > 0'
             logging.error(msg)
             self.pywaves.throw_error(msg)
@@ -744,17 +739,13 @@ class Address(object):
                                      host=self.pywaves.MATCHER)
 
     def createAlias(self, alias, txFee=pw.DEFAULT_ALIAS_FEE, timestamp=0):
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        else:
-            if timestamp == 0:
-                timestamp = int(time.time() * 1000)
+        self.pywaves.requirePrivateKey(self)
+        if timestamp == 0:
+            timestamp = int(time.time() * 1000)
 
-            tx = self.txGenerator.generateAlias(alias, self.publicKey, txFee, timestamp)
-            self.txSigner.signTx(tx, self.privateKey)
-            return self.broadcastTx(tx)
+        tx = self.txGenerator.generateAlias(alias, self.publicKey, txFee, timestamp)
+        self.txSigner.signTx(tx, self.privateKey)
+        return self.broadcastTx(tx)
 
     def sponsorAsset(self, assetId, minimalFeeInAssets, txFee=pw.DEFAULT_SPONSOR_FEE, timestamp=0):
         if not self.privateKey:
