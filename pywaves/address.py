@@ -351,11 +351,8 @@ class Address(object):
 
     def sendWaves(self, recipient, amount, attachment='', txFee=pw.DEFAULT_TX_FEE, timestamp=0):
         self.pywaves.requirePrivateKey(self)
-        if amount <= 0:
-            msg = 'Amount must be > 0'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif not self.pywaves.OFFLINE and self.balance() < amount + txFee:
+        self.pywaves.amountMustBePositive(amount)
+        if not self.pywaves.OFFLINE and self.balance() < amount + txFee:
             msg = 'Insufficient Waves balance'
             logging.error(msg)
             self.pywaves.throw_error(msg)
@@ -402,15 +399,9 @@ class Address(object):
 
     def sendAsset(self, recipient, asset, amount, attachment='', feeAsset='', txFee=pw.DEFAULT_TX_FEE, timestamp=0):
         self.pywaves.requirePrivateKey(self)
-        if not self.pywaves.OFFLINE and asset and not asset.status():
-            msg = 'Asset not issued'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif amount <= 0:
-            msg = 'Amount must be > 0'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif not self.pywaves.OFFLINE and asset and self.balance(asset.assetId) < amount:
+        self.pywaves.amountMustBePositive(amount)
+        self.pywaves.assetMustBeIssued(asset)
+        if not self.pywaves.OFFLINE and asset and self.balance(asset.assetId) < amount:
             msg = 'Insufficient asset balance'
             logging.error(msg)
             self.pywaves.throw_error(msg)
@@ -643,11 +634,8 @@ class Address(object):
 
     def lease(self, recipient, amount, txFee=pw.DEFAULT_LEASE_FEE, timestamp=0):
         self.pywaves.requirePrivateKey(self)
-        if amount <= 0:
-            msg = 'Amount must be > 0'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif not self.pywaves.OFFLINE and self.balance() < amount + txFee:
+        self.pywaves.amountMustBePositive(amount)
+        if not self.pywaves.OFFLINE and self.balance() < amount + txFee:
             msg = 'Insufficient Waves balance'
             logging.error(msg)
             self.pywaves.throw_error(msg)

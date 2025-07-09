@@ -100,6 +100,14 @@ def requirePrivateKey(self):
     if not self.privateKey:        
         raise PyWavesException('Private key required')
 
+def amountMustBePositive(amount):
+    if amount <= 0:
+        raise PyWavesException('Amount must be > 0')
+
+def assetMustBeIssued(self, asset):
+    if not self.OFFLINE and asset and not asset.status():
+        raise PyWavesException('Asset not issued')
+
 def setOffline():
     global OFFLINE
     OFFLINE = True
