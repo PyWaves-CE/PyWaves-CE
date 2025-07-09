@@ -8,7 +8,6 @@ import pytest
 
 
 NAME = 'Issue' + time.strftime('%y%m%d')
-pw.setThrowOnError(True)
 helpers = Helpers()
 
 try:

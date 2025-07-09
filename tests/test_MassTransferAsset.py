@@ -8,7 +8,6 @@ import random
 import string
 
 PYWAVES_TEST_SECRET = os.getenv('PYWAVES_TEST_SECRET')
-pw.setThrowOnError(True)
 helpers = Helpers()
 
 try:

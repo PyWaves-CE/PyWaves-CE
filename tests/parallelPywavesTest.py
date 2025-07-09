@@ -2,8 +2,6 @@ from tests.helpers import Helpers
 import pywaves as pw
 from pywaves import address
 
-pw.setThrowOnError(True)
-
 def test_successfulTransfer():
     helpers = Helpers()
     parallelPW = pw.ParallelPyWaves()

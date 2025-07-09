@@ -7,7 +7,6 @@ from pywaves.txSigner import TxSigner
 from pywaves.txGenerator import TxGenerator
 import os
 
-pw.setThrowOnError(True)
 helpers = Helpers()
 
 try:

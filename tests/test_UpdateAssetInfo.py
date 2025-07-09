@@ -9,7 +9,6 @@ import time
 
 PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
 PYWAVES_TEST_SECRET = os.getenv('PYWAVES_TEST_SECRET')
-pw.setThrowOnError(True)
 pw.setNode(PYWAVES_TEST_NODE, 'T')
 helpers = Helpers()
 

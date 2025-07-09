@@ -7,7 +7,6 @@ import pytest
 import random
 import string
 
-pw.setThrowOnError(True)
 helpers = Helpers()
 
 try: 

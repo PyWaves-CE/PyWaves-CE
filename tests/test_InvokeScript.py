@@ -6,7 +6,6 @@ import pytest
 import os  
 
 
-pw.setThrowOnError(True)
 helpers = Helpers()
 
 

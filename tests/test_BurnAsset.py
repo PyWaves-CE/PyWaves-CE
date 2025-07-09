@@ -6,7 +6,6 @@ from random import randint
 from tests.helpers import Helpers
 import os
 
-pw.setThrowOnError(True)
 helpers = Helpers()
 
 try:

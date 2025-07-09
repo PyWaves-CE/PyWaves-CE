@@ -5,7 +5,6 @@ from tests.helpers import Helpers
 import os
 
 PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
-pw.setThrowOnError(True)
 helpers = Helpers()
 testwallet = None
 

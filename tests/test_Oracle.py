@@ -3,7 +3,6 @@ import pywaves as pw
 from pywaves.oracle import Oracle
 import os  
 
-pw.setThrowOnError(True)
 helpers = Helpers()
 
 try:

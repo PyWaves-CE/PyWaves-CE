@@ -6,7 +6,6 @@ import os
 import random
 import string
 
-pw.setThrowOnError(True)
 helpers = Helpers()
 
 try:

@@ -5,7 +5,6 @@ from pywaves import asset
 import os
 import pytest
 
-pw.setThrowOnError(True)
 helpers = Helpers()
 
 

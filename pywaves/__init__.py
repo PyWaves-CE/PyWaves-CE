@@ -97,10 +97,8 @@ def setThrowOnError(throw=True):
 '''
 
 def requirePrivateKey(self):
-    if not self.privateKey:
-        msg = 'Private key required'
-        logging.error(msg)
-        raise PyWavesException(msg)
+    if not self.privateKey:        
+        raise PyWavesException('Private key required')
 
 def setOffline():
     global OFFLINE
