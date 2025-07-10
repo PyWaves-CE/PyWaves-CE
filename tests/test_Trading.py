@@ -30,7 +30,7 @@ try:
         with pytest.raises(Exception) as error:
             testwallet.cancelOrder(A_B, notExistingOrder)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Order not found\') tblen=3>'
+        assert str(error.value) == 'Order not found'
 
     def test_deleteOrderFilled():
         order1 = testwallet.sell(A_B, amount=1, price=1, maxLifetime=15*86400)
@@ -40,7 +40,7 @@ try:
         with pytest.raises(Exception) as error:
             testwallet.cancelOrder(A_B, order1)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Order already filled\') tblen=3>'
+        assert str(error.value) == 'Order already filled'
 
     # place sell orders
     def test_succesfullSellOrder():

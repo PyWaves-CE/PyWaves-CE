@@ -21,13 +21,13 @@ try:
             myAddress = address.Address('3MwGH6GPcq7jiGNXgS4K6buynpLZR5LAgQm')
             tx = myAddress.issueAsset('Test2','This is just another test asset', 100000, 1)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Private key required\') tblen=3>'
+        assert str(error.value) == 'Private key required'
 
     def test_issueAssetWithTooShortName():
         with pytest.raises(Exception) as error:
             tx = testwallet.issueAsset('Tes','This is just another test asset', 100000, 1)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Asset name must be between 4 and 16 characters long\') tblen=3>'
+        assert str(error.value) == 'Asset name must be between 4 and 16 characters long'
 
     def test_pywavesOffline():
         pw.setOffline()
@@ -40,7 +40,7 @@ try:
         with pytest.raises(Exception) as error:
             tx = testwallet.issueAsset('12345678912345678','This is just another test asset', 100000, 1)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Asset name must be between 4 and 16 characters long\') tblen=3>'
+        assert str(error.value) == 'Asset name must be between 4 and 16 characters long'
 
     def test_successfulIssueAsset():
         tx = testwallet.issueAsset(NAME, f"Test Token {NAME}", 100, 8, reissuable=True)

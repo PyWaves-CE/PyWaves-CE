@@ -29,13 +29,13 @@ try:
         with pytest.raises(Exception) as error:
             myAddress.leaseCancel(leasingId)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Private key required\') tblen=3>'
+        assert str(error.value) == 'Private key required'
     
     def test_cancelWithFeeIsBiggerThanBalance():
         with pytest.raises(Exception) as error:
             leasingAddressWithNoBalance.leaseCancel(leasingId)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Insufficient Waves balance\') tblen=3>'
+        assert str(error.value) == 'Insufficient Waves balance'
         
     def test_succesfullCancelLeasing():
         leaseTransaction = testwallet.lease(leasingAddress, 900000)

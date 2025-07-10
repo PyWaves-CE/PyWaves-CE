@@ -31,7 +31,7 @@ try:
         with pytest.raises(Exception) as error:
             myAddress.massTransferWaves(transfers)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Private key required\') tblen=3>'
+        assert str(error.value) == 'Private key required'
 
     def test_massTransferWithoutEnoughWaves():
         transfers = [
@@ -42,7 +42,7 @@ try:
         with pytest.raises(Exception) as error:
             testwallet.massTransferWaves(transfers)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Insufficient Waves balance\') tblen=3>'
+        assert str(error.value) == 'Insufficient Waves balance'
 
     def test_succesfullMassTransfer():
         transfers = [
@@ -191,7 +191,7 @@ try:
         with pytest.raises(Exception) as error:
             testwallet.massTransferWaves(transfers)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Too many recipients\') tblen=3>'
+        assert str(error.value) == 'Too many recipients'
     
     def test_closeTestcase():
         print("----- Closing testcase -----")

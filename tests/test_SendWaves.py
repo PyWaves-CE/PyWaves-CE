@@ -19,19 +19,19 @@ try:
         with pytest.raises(Exception) as error:
             myAddress.sendWaves(address.Address('3MuqNWyf4RMWz3cqDi4QZRVr9v76LKMjNVZ'), 100*10**8)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Private key required\') tblen=3>'
+        assert str(error.value) == 'Private key required'
 
     def test_sendWavesButSelfBalanceIsInsufficient():
         with pytest.raises(Exception) as error:
             testwallet.sendWaves(address.Address('3MuqNWyf4RMWz3cqDi4QZRVr9v76LKMjNVZ'), 100*10**8)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Insufficient Waves balance\') tblen=3>'
+        assert str(error.value) == 'Insufficient Waves balance'
 
     def test_sendWavesButWithoutAmount():
         with pytest.raises(Exception) as error:
             testwallet.sendWaves(address.Address('3MuqNWyf4RMWz3cqDi4QZRVr9v76LKMjNVZ'), 0)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Amount must be > 0\') tblen=3>'
+        assert str(error.value) == 'Amount must be > 0'
 
     def test_successfulTransfer():
         tx = testwallet.sendWaves(address.Address('3MuqNWyf4RMWz3cqDi4QZRVr9v76LKMjNVZ'), 1*10*4, txFee=500000)

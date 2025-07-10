@@ -28,7 +28,7 @@ try:
             }]
             tx = myAddress.dataTransaction(data)
        
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Private key required\') tblen=3>'
+        assert str(error.value) == 'Private key required'
 
     def test_dataTransactionWithInsufficientWavesBalance():
         with pytest.raises(Exception) as error:
@@ -39,7 +39,7 @@ try:
             }]
             tx = address1.dataTransaction(data)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Insufficient Waves balance\') tblen=3>'
+        assert str(error.value) == 'Insufficient Waves balance'
    
     def test_stringDataTransaction():
         data = [{

@@ -29,7 +29,7 @@ try:
         with pytest.raises(Exception) as error:
             myAddress.issueSmartAsset(assetName, 'This is just a test smart asset', 10000000, scriptSource = script)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Private key required\') tblen=3>'
+        assert str(error.value) == 'Private key required'
 
     def test_nameTooShort():
         script = 'match tx { \n' + \
@@ -38,7 +38,7 @@ try:
         with pytest.raises(Exception) as error:
             testwallet.issueSmartAsset('Sma', 'This is just a test smart asset', 10000000, scriptSource=script)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Asset name must be between 4 and 16 characters long\') tblen=3>'
+        assert str(error.value) == 'Asset name must be between 4 and 16 characters long'
 
     def test_nameTooLong():
         script = 'match tx { \n' + \
@@ -47,7 +47,7 @@ try:
         with pytest.raises(Exception) as error:
             testwallet.issueSmartAsset('SmartTestAssetTeststst', 'This is just a test smart asset', 10000000, scriptSource=script)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Asset name must be between 4 and 16 characters long\') tblen=3>'
+        assert str(error.value) == 'Asset name must be between 4 and 16 characters long'
 
     def test_succesfullIssueSmartAsset():    
         script = 'match tx { \n' + \

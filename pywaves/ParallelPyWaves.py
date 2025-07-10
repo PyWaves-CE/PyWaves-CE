@@ -37,8 +37,6 @@ class ParallelPyWaves(object):
         self.VALID_TIMEFRAMES = (5, 15, 30, 60, 240, 1440)
         self.MAX_WDF_REQUEST = 100
 
-        self.THROW_EXCEPTION_ON_ERROR = False
-
         self.OFFLINE = False
         self.NODE = 'https://nodes.wavesnodes.com'
 
@@ -65,13 +63,7 @@ class ParallelPyWaves(object):
         self.BTC = Asset('8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS')
         self.USD = Asset('Ft8X1v1LTa1ABafufpaCWyVj8KkaxUWE6xBhW6sNFJck')
 
-    def throw_error(self, msg):
-        if self.THROW_EXCEPTION_ON_ERROR:
-            raise PyWavesException(msg)
-
-    def setThrowOnError(self, throw=True):
-        self.THROW_EXCEPTION_ON_ERROR = throw
-
+    
 
     def setOffline(self):
         self.OFFLINE = True
@@ -191,5 +183,8 @@ class ParallelPyWaves(object):
             return True
         return False
 
-class PyWavesException(ValueError):
-    pass
+class PyWavesException(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+        logging.error("An exception occurred: " + msg)
+        super().__init__(msg)

@@ -54,7 +54,7 @@ try:
         with pytest.raises(Exception) as error:
             myAddress.massTransferAssets(transfers, myToken)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Private key required\') tblen=3>'
+        assert str(error.value) == 'Private key required'
 
     def test_assetMassTransferWithTooMuchRecipients():    
         transfers = [
@@ -222,7 +222,7 @@ try:
         with pytest.raises(Exception) as error:
             testwallet.massTransferAssets(transfers, myToken)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Too many recipients\') tblen=3>'
+        assert str(error.value) == 'Too many recipients'
 
     def test_feeIsBiggerThanAmountMassTransfer():
         transfers = [
@@ -233,7 +233,7 @@ try:
         with pytest.raises(Exception) as error:
             addressWithNoBalance.massTransferAssets(transfers, myToken)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Insufficient Waves balance\') tblen=3>'
+        assert str(error.value) == 'Insufficient Waves balance'
 
     def test_amountIsBiggerThanBalanceMassTransfer():
         transfers = [
@@ -244,7 +244,7 @@ try:
         with pytest.raises(Exception) as error:
             testwallet.massTransferAssets(transfers, myToken)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Insufficient Asset balance\') tblen=3>'
+        assert str(error.value) == 'Insufficient Asset balance'
 
     def test_succesfullAssetMassTransfer():
         transfers = [

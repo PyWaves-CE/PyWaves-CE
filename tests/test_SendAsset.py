@@ -28,32 +28,32 @@ try:
         with pytest.raises(Exception) as error:
             myAddress.sendAsset(address.Address('3MuqNWyf4RMWz3cqDi4QZRVr9v76LKMjNVZ'), myToken, 3)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Private key required\') tblen=3>'
+        assert str(error.value) == 'Private key required'
 
     def test_assetTransactionWithAmountSmallerEqualsZero():
         with pytest.raises(Exception) as error:
             testwallet.sendAsset(address.Address('3MuqNWyf4RMWz3cqDi4QZRVr9v76LKMjNVZ'), myToken, -1)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Amount must be > 0\') tblen=3>'
+        assert str(error.value) == 'Amount must be > 0'
 
     def test_nonExistantAssetTransaction():
         myToken = asset.Asset('Test')
         with pytest.raises(Exception) as error:
             testwallet.sendAsset(address.Address('3MuqNWyf4RMWz3cqDi4QZRVr9v76LKMjNVZ'), myToken, 1)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Asset not issued\') tblen=3>'
+        assert str(error.value) == 'Asset not issued'
 
     def test_assetTransactionButAmountBiggerThanBalance():
         with pytest.raises(Exception) as error:
             testwallet.sendAsset(address.Address('3MuqNWyf4RMWz3cqDi4QZRVr9v76LKMjNVZ'), myToken, 5000000000)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Insufficient asset balance\') tblen=3>'
+        assert str(error.value) == 'Insufficient Asset balance'
    
     def test_transactionWithNoAsset():
         with pytest.raises(Exception) as error:
             testwallet.sendAsset(address.Address('3MuqNWyf4RMWz3cqDi4QZRVr9v76LKMjNVZ'), None, 100000000000000000)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Insufficient Waves balance\') tblen=3>'
+        assert str(error.value) == 'Insufficient Waves balance'
   
     def test_successfulTransactionWithSponsoredFee():
         tx = testwallet.sendAsset(address.Address('3MuqNWyf4RMWz3cqDi4QZRVr9v76LKMjNVZ'), myToken, 5, feeAsset = myToken, txFee=1)
@@ -77,7 +77,7 @@ try:
     def test_transactionFeeIsBiggerThanSelfBalance():
         with pytest.raises(Exception) as error:
             testwallet.sendAsset(address.Address('3MuqNWyf4RMWz3cqDi4QZRVr9v76LKMjNVZ'), myToken, 5, feeAsset=myToken, txFee=100000000)
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Insufficient asset balance for fee\') tblen=3>'
+        assert str(error.value) == 'Insufficient Asset balance for fee'
     
     # Dummy test case to return funds to faucet
     def test_closeTestcase():

@@ -39,7 +39,7 @@ try:
         with pytest.raises(Exception) as error:
             myAddress.invokeScript(dappaddress1.address, 'storeValue', parameters, [])
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Private key required\') tblen=3>'
+        assert str(error.value) == 'Private key required'
 
     def test_callToDefaultCallable():      
         script = '''{-# STDLIB_VERSION 6 #-}

@@ -24,7 +24,7 @@ try:
         with pytest.raises(Exception) as error:
             myAddress.createAlias(alias)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Private key required\') tblen=3>'
+        assert str(error.value) == 'Private key required'
 
     def test_succesfullAlias():
         tx = testwallet.createAlias(alias)

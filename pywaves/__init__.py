@@ -73,28 +73,22 @@ logging.basicConfig(
 logging.getLogger("pywaves").setLevel(logging.INFO)
 logging.getLogger("requests").setLevel(logging.WARNING)
 
-'''
-#TODO: Remove this class and use the one below
-class PyWavesException(ValueError):
-    pass
-'''
-
 class PyWavesException(Exception):
     def __init__(self, msg):
         self.msg = msg
         logging.error("An exception occurred: " + msg)
         super().__init__(msg)
 
-#TODO: Remove this function
-def throw_error(msg):
+def throwException(msg):
     raise PyWavesException(msg)
 
-'''
-#TODO: Remove this function
-def setThrowOnError(throw=True):
-    global THROW_EXCEPTION_ON_ERROR
-    THROW_EXCEPTION_ON_ERROR = throw
-'''
+def isWavesBalanceEnough(self, amount):
+    if not self.pywaves.OFFLINE and self.balance() < amount:
+        raise PyWavesException('Insufficient Waves balance')
+
+def isAssetBalanceEnough(self, asset, amount):
+    if not self.pywaves.OFFLINE and asset != None and self.balance(asset.assetId) < amount:
+        raise PyWavesException('Insufficient Asset balance')
 
 def requirePrivateKey(self):
     if not self.privateKey:        
@@ -105,7 +99,7 @@ def amountMustBePositive(amount):
         raise PyWavesException('Amount must be > 0')
 
 def assetMustBeIssued(self, asset):
-    if not self.OFFLINE and asset and not asset.status():
+    if not self.pywaves.OFFLINE and asset and not asset.status():
         raise PyWavesException('Asset not issued')
 
 def timefraneMustBeValid(timeframe):
