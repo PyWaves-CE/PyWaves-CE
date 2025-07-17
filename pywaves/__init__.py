@@ -49,6 +49,26 @@ ADDRESS_CHECKSUM_LENGTH = 4
 ADDRESS_HASH_LENGTH = 20
 ADDRESS_LENGTH = 1 + 1 + ADDRESS_CHECKSUM_LENGTH + ADDRESS_HASH_LENGTH
 
+<<<<<<< HEAD
+=======
+CHAIN = 'mainnet'
+CHAIN_ID = 'W'
+MATCHER = None
+MATCHER_PUBLICKEY = None
+
+#DATAFEED = 'http://marketdata.wavesplatform.com'
+DATAFEED = 'https://api.wavesplatform.com'
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+
+logging.getLogger("pywaves").setLevel(logging.INFO)
+logging.getLogger("requests").setLevel(logging.WARNING)
+
+>>>>>>> acf5829 (setMatcher)
 class PyWavesException(Exception):
     def __init__(self, msg):
         self.msg = msg
