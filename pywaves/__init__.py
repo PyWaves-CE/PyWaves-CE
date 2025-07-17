@@ -46,7 +46,7 @@ from .txGenerator import *
 from .txSigner import *
 
 OFFLINE = False
-NODE = 'https://nodes.wavesnodes.com'
+NODE = None
 
 ADDRESS_VERSION = 1
 ADDRESS_CHECKSUM_LENGTH = 4
@@ -147,7 +147,10 @@ def getChain():
 
 def setNode(node = NODE, chain = CHAIN, chain_id = None):
     global NODE, CHAIN, CHAIN_ID
-    NODE = node.rstrip("/")
+    if node is None:
+        node = 'https://nodes.wavesnodes.com'
+    else:
+        NODE = node.rstrip("/")
     setChain(chain, chain_id)
 
 def getNode():
