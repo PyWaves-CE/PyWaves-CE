@@ -55,11 +55,8 @@ ADDRESS_LENGTH = 1 + 1 + ADDRESS_CHECKSUM_LENGTH + ADDRESS_HASH_LENGTH
 
 CHAIN = 'mainnet'
 CHAIN_ID = 'W'
-#MATCHER = 'https://nodes.wavesnodes.com'
-#MATCHER = 'http://matcher.wavesnodes.com'
-MATCHER = 'https://matcher.waves.exchange'
-#MATCHER_PUBLICKEY = ''
-MATCHER_PUBLICKEY = '9cpfKN9suPNvfeUNphzxXMjcnn974eme8ZhWUjaktzU5'
+MATCHER = None
+MATCHER_PUBLICKEY = None
 
 #DATAFEED = 'http://marketdata.wavesplatform.com'
 DATAFEED = 'https://api.wavesplatform.com'
@@ -156,8 +153,13 @@ def setNode(node = NODE, chain = CHAIN, chain_id = None):
 def getNode():
     return NODE
 
-def setMatcher(node = MATCHER):
+def setMatcher(node):
     global MATCHER, MATCHER_PUBLICKEY
+
+    if node is None:
+        node = 'https://matcher.waves.exchange'
+    else:
+        node = node.rstrip("/")
     try:
         MATCHER_PUBLICKEY = wrapper('/matcher', host = node)
         MATCHER = node
