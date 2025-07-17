@@ -57,9 +57,7 @@ CHAIN = 'mainnet'
 CHAIN_ID = 'W'
 MATCHER = None
 MATCHER_PUBLICKEY = None
-
-#DATAFEED = 'http://marketdata.wavesplatform.com'
-DATAFEED = 'https://api.wavesplatform.com'
+DATAFEED = None
 
 logging.basicConfig(
     level=logging.INFO,
@@ -167,10 +165,18 @@ def setMatcher(node):
     except:
         MATCHER_PUBLICKEY = ''
 
-def setDatafeed(wdf = DATAFEED):
+def setDatafeed(node):
     global DATAFEED
-    DATAFEED = wdf
+    if node is None:
+        node = 'https://api.wavesplatform.com'
+    else:
+        node = node.rstrip("/")
+    
+    DATAFEED = node
     logging.info('Setting datafeed %s ' % (DATAFEED))
+
+def getDatafeed():
+    return DATAFEED
 
 def wrapper(api, postData='', host='', headers=''):
     global OFFLINE
@@ -184,11 +190,11 @@ def wrapper(api, postData='', host='', headers=''):
         host = NODE
     if postData:
         url = '%s%s' % (host, api)
-        #print(f"Making POST request to: {url}")
+        print(f"Making POST request to: {url}")
         req = requests.post(url, data=postData, headers={'content-type': 'application/json'}).json()
     else:
         url = '%s%s' % (host, api)
-        #print(f"Making GET request to: {url}")
+        print(f"Making GET request to: {url}")
         req = requests.get(url, headers=headers).json()
     return req
 
