@@ -190,11 +190,11 @@ def wrapper(api, postData='', host='', headers=''):
         host = NODE
     if postData:
         url = '%s%s' % (host, api)
-        print(f"Making POST request to: {url}")
+        #print(f"Making POST request to: {url}")
         req = requests.post(url, data=postData, headers={'content-type': 'application/json'}).json()
     else:
         url = '%s%s' % (host, api)
-        print(f"Making GET request to: {url}")
+        #print(f"Making GET request to: {url}")
         req = requests.get(url, headers=headers).json()
     return req
 

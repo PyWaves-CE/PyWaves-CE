@@ -11,6 +11,7 @@ PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
 PYWAVES_TEST_MATCHER = 'https://testnet.waves.exchange/api/v1/forward/matcher'
 pw.setNode(PYWAVES_TEST_NODE, 'T')
 pw.setMatcher(PYWAVES_TEST_MATCHER)
+pw.setDatafeed('https://api.wavesplatform.com')
 helpers = Helpers()
         
 try:

@@ -361,6 +361,18 @@ class Address(object):
     def signTx(self, tx):
         self.txSigner.signTx(tx, self.privateKey)
 
+    def wavesBalance(self):
+        """
+        Retrieves the detailed balance information for this address from the Waves node.
+
+        Returns:
+            dict: A dictionary containing the balances as returned by the node.
+                  Example keys: 'regular', 'available', 'effective', 'generating'
+        """
+        endpoint = f"/addresses/balance/details/{self.address}"
+        result = self.pywaves.wrapper(endpoint)
+        return result
+        
     def massTransferWaves(self, transfers, attachment='', timestamp=0, baseFee=pw.DEFAULT_BASE_FEE):
         txFee = baseFee + (math.ceil((len(transfers) + 1) / 2 - 0.5)) * baseFee
         txFee += self.script()['extraFee']
