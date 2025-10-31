@@ -154,12 +154,34 @@ def wrapper(api, postData='', host='', headers=''):
     if postData:
         url = '%s%s' % (host, api)
         #print(f"Making POST request to: {url}")
-        req = requests.post(url, data=postData, headers={'content-type': 'application/json'}).json()
+        response = requests.post(url, data=postData, headers={'content-type': 'application/json'})
     else:
         url = '%s%s' % (host, api)
         #print(f"Making GET request to: {url}")
-        req = requests.get(url, headers=headers).json()
-    return req
+        response = requests.get(url, headers=headers)
+
+    response.raise_for_status()
+
+    try:
+        return response.json()
+    except ValueError as e:
+        logging.error(f"[wrapper] Failed to decode JSON from {url}")
+        logging.error(f"[wrapper] HTTP Status: {response.status_code}")
+        logging.error(f"[wrapper] Content-Type: {response.headers.get('Content-Type', 'unknown')}")
+        logging.error(f"[wrapper] Response headers: {dict(response.headers)}")
+        logging.error(f"[wrapper] Response content size: {len(response.content)} bytes")
+        logging.error(f"[wrapper] Response text length: {len(response.text)} characters")
+        if response.text:
+            logging.error(f"[wrapper] Full response text ({len(response.text)} chars):")
+            logging.error(f"[wrapper] {response.text}")
+        else:
+            logging.error(f"[wrapper] Response text is empty")
+        if response.content:
+            preview_bytes = response.content[:500]
+            logging.error(f"[wrapper] Raw bytes preview (first {len(preview_bytes)} bytes):")
+            logging.error(f"[wrapper] {preview_bytes}")
+        logging.error(f"[wrapper] JSON decode error: {e}")
+        raise
 
 def height():
     return wrapper('/blocks/height')['height']
