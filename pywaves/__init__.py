@@ -189,7 +189,11 @@ def wrapper(api, postData='', host='', headers=''):
             api_error = _format_json_decode_error(response, url, e)
             logging.error(f"[wrapper] {url} -> {api_error['error']} ({api_error['message']})")
             return api_error
-        logging.warning(f"[wrapper] {url} -> {api_error['error']} ({api_error['message']})")
+        # 311 (TransactionDoesNotExist) expected during waitFor() polling
+        if api_error.get('error') == 311:
+            logging.debug(f"[wrapper] {url} -> {api_error['error']} ({api_error['message']})")
+        else:
+            logging.warning(f"[wrapper] {url} -> {api_error['error']} ({api_error['message']})")
         return api_error
 
     try:
