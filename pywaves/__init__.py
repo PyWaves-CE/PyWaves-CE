@@ -141,6 +141,19 @@ def setDatafeed(wdf = DATAFEED):
     DATAFEED = wdf
     logging.info('Setting datafeed %s ' % (DATAFEED))
 
+def _format_json_decode_error(response, url, e):
+    api_error = {
+        'error': 1,  # WrongJson
+        'message': f"Failed to decode JSON: {str(e)}"
+    }
+    if response.text:
+        api_error['response'] = response.text
+    elif response.content:
+        api_error['response'] = response.content
+    else:
+        api_error['response'] = None
+    return api_error
+
 def wrapper(api, postData='', host='', headers=''):
     global OFFLINE
     if OFFLINE:
@@ -160,28 +173,31 @@ def wrapper(api, postData='', host='', headers=''):
         #print(f"Making GET request to: {url}")
         response = requests.get(url, headers=headers)
 
-    response.raise_for_status()
+    if response.status_code >= 400:
+        api_error = {
+            'error': response.status_code,
+            'message': f"HTTP {response.status_code}"
+        }
+        try:
+            error_response = response.json()
+            if isinstance(error_response, dict) and 'error' in error_response and 'message' in error_response:
+                api_error = error_response
+            else:
+                api_error['response'] = error_response
+                api_error['message'] = f"HTTP {response.status_code}: {str(error_response)[:200]}"
+        except ValueError as e:
+            api_error = _format_json_decode_error(response, url, e)
+            logging.error(f"[wrapper] {url} -> {api_error['error']} ({api_error['message']})")
+            return api_error
+        logging.warning(f"[wrapper] {url} -> {api_error['error']} ({api_error['message']})")
+        return api_error
 
     try:
         return response.json()
     except ValueError as e:
-        logging.error(f"[wrapper] Failed to decode JSON from {url}")
-        logging.error(f"[wrapper] HTTP Status: {response.status_code}")
-        logging.error(f"[wrapper] Content-Type: {response.headers.get('Content-Type', 'unknown')}")
-        logging.error(f"[wrapper] Response headers: {dict(response.headers)}")
-        logging.error(f"[wrapper] Response content size: {len(response.content)} bytes")
-        logging.error(f"[wrapper] Response text length: {len(response.text)} characters")
-        if response.text:
-            logging.error(f"[wrapper] Full response text ({len(response.text)} chars):")
-            logging.error(f"[wrapper] {response.text}")
-        else:
-            logging.error(f"[wrapper] Response text is empty")
-        if response.content:
-            preview_bytes = response.content[:500]
-            logging.error(f"[wrapper] Raw bytes preview (first {len(preview_bytes)} bytes):")
-            logging.error(f"[wrapper] {preview_bytes}")
-        logging.error(f"[wrapper] JSON decode error: {e}")
-        raise
+        api_error = _format_json_decode_error(response, url, e)
+        logging.error(f"[wrapper] {url} -> {api_error['error']} ({api_error['message']})")
+        return api_error
 
 def height():
     return wrapper('/blocks/height')['height']
