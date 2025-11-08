@@ -1,4 +1,5 @@
 import pywaves as pw
+from pywaves import PyWavesException
 import logging
 
 class Asset(object):
