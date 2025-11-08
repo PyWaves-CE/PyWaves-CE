@@ -178,6 +178,19 @@ def setDatafeed(node):
 def getDatafeed():
     return DATAFEED
 
+def _format_json_decode_error(response, url, e):
+    api_error = {
+        'error': 1,  # WrongJson
+        'message': f"Failed to decode JSON: {str(e)}"
+    }
+    if response.text:
+        api_error['response'] = response.text
+    elif response.content:
+        api_error['response'] = response.content
+    else:
+        api_error['response'] = None
+    return api_error
+
 def wrapper(api, postData='', host='', headers=''):
     global OFFLINE
     if OFFLINE:
@@ -191,12 +204,41 @@ def wrapper(api, postData='', host='', headers=''):
     if postData:
         url = '%s%s' % (host, api)
         #print(f"Making POST request to: {url}")
-        req = requests.post(url, data=postData, headers={'content-type': 'application/json'}).json()
+        response = requests.post(url, data=postData, headers={'content-type': 'application/json'})
     else:
         url = '%s%s' % (host, api)
         #print(f"Making GET request to: {url}")
-        req = requests.get(url, headers=headers).json()
-    return req
+        response = requests.get(url, headers=headers)
+
+    if response.status_code >= 400:
+        api_error = {
+            'error': response.status_code,
+            'message': f"HTTP {response.status_code}"
+        }
+        try:
+            error_response = response.json()
+            if isinstance(error_response, dict) and 'error' in error_response and 'message' in error_response:
+                api_error = error_response
+            else:
+                api_error['response'] = error_response
+                api_error['message'] = f"HTTP {response.status_code}: {str(error_response)[:200]}"
+        except ValueError as e:
+            api_error = _format_json_decode_error(response, url, e)
+            logging.error(f"[wrapper] {url} -> {api_error['error']} ({api_error['message']})")
+            return api_error
+        # 311 (TransactionDoesNotExist) expected during waitFor() polling
+        if api_error.get('error') == 311:
+            logging.debug(f"[wrapper] {url} -> {api_error['error']} ({api_error['message']})")
+        else:
+            logging.warning(f"[wrapper] {url} -> {api_error['error']} ({api_error['message']})")
+        return api_error
+
+    try:
+        return response.json()
+    except ValueError as e:
+        api_error = _format_json_decode_error(response, url, e)
+        logging.error(f"[wrapper] {url} -> {api_error['error']} ({api_error['message']})")
+        return api_error
 
 def height():
     return wrapper('/blocks/height')['height']

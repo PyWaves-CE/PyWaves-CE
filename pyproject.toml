@@ -13,6 +13,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
@@ -20,7 +21,7 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.8"
 requests = "^2.32.3"
-pywaves-curve25519 = "^1.0.3"
+pywaves-curve25519 = "^1.0.4"
 pywaves-protobuf = "^1.5.2"
 base58 = "^2.1.1"
 

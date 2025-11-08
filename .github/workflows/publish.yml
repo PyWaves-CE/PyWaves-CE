@@ -17,15 +17,15 @@ jobs:
       matrix:
         os: >-
           ${{
-            github.ref == 'refs/heads/dev' && 
-            fromJSON('["ubuntu-latest"]') || 
-            fromJSON('["ubuntu-latest", "macos-latest", "windows-latest"]')
+            github.event_name == 'workflow_dispatch' &&
+            fromJSON('["ubuntu-latest", "macos-latest", "windows-latest"]') ||
+            fromJSON('["ubuntu-latest"]')
           }}
         python-version: >-
           ${{
-            github.ref == 'refs/heads/dev' && 
-            fromJSON('["3.12"]') ||
-            fromJSON('["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]')
+            github.event_name == 'workflow_dispatch' &&
+            fromJSON('["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]') ||
+            fromJSON('["3.12"]')
           }}
 
     steps:
