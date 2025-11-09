@@ -15,6 +15,7 @@ PYTHON_TESTS = [
     "tests/test_MassTransferWaves.py",
     "tests/test_MultiSignature.py",
     "tests/test_Oracle.py",
+    "tests/test_ParallelPyWaves.py",
     "tests/test_ReissueAsset.py",
     "tests/test_SendAsset.py",
     "tests/test_SendWaves.py",
