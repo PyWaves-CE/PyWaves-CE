@@ -5,37 +5,36 @@ from pywaves import asset
 import pytest
 import os
 
-PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
-
-pw.setThrowOnError(True)
-pw.setNode(PYWAVES_TEST_NODE, 'T')
-
 helpers = Helpers()
-testwallet = helpers.prepareTestcase(100000000)
-
-seed = pw.b58encode(os.urandom(32))
-print(f"Using seed: {seed}")
-leasingAddress = address.Address(seed=seed)
 
 try:
+    def test_prepareTestcase():
+        global testwallet, leasingAddress
+        testwallet = helpers.prepareTestcase(100000000)
+        seed = pw.b58encode(os.urandom(32))
+        leasingAddress = address.Address(seed=seed)
+
+        assert testwallet is not None
+        assert leasingAddress is not None
+
     def test_leasingWithoutPrivateKey():
         myAddress = address.Address('3MpvqThrQUCC1DbkY9sMmo4fp77e2h11NaM')
         with pytest.raises(Exception) as error:
             myAddress.lease(leasingAddress, 10000000)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Private key required\') tblen=3>'
+        assert str(error.value) == 'Private key required'
 
     def test_leasingWithAmountSmallerEqualsZero():        
         with pytest.raises(Exception) as error:
             testwallet.lease(leasingAddress, -10000000)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Amount must be > 0\') tblen=3>'
+        assert str(error.value) == 'Amount must be > 0'
 
     def test_balanceSmallerThanAmount():
         with pytest.raises(Exception) as error:
             testwallet.lease(leasingAddress, 10000000000000000000000)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Insufficient Waves balance\') tblen=3>'
+        assert str(error.value) == 'Insufficient Waves balance'
 
     def test_succesfullLeasing():
         tx = testwallet.lease(leasingAddress, 100000)

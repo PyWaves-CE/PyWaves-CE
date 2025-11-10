@@ -7,17 +7,16 @@ import pytest
 import random
 import string
 
-PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
-
-pw.setThrowOnError(True)
 helpers = Helpers()
-testwallet = helpers.prepareTestcase(310000000)
-
-seed = pw.b58encode(os.urandom(32))
-address1 = address.Address(seed=seed)
-
 
 try: 
+    def test_prepareTestcase():
+        global testwallet, address1
+        testwallet = helpers.prepareTestcase(310000000)
+        seed = pw.b58encode(os.urandom(32))
+        address1 = address.Address(seed=seed)
+        assert testwallet is not None
+        assert address1 is not None
 
     def test_setScriptWithoutPrivateKey():
         myAddress = address.Address(address1.address)

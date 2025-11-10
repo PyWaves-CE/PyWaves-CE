@@ -5,12 +5,15 @@ from tests.helpers import Helpers
 import os
 
 PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
-pw.setThrowOnError(True)
-pw.setNode(PYWAVES_TEST_NODE, 'T')
 helpers = Helpers()
-testwallet = helpers.prepareTestcase(100000000)
+testwallet = None
 
 try:
+
+    def test_prepareTestcase():
+        global testwallet
+        testwallet = helpers.prepareTestcase(100000000)
+        assert testwallet is not None
 
     def test_addressWithoutScript():
         result = testwallet.script()

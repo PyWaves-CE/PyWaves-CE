@@ -3,10 +3,9 @@ from pywaves import address
 import pytest
 import os
 from tests.helpers import Helpers
+from pywaves import PyWavesException
 
 PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
-
-pw.setThrowOnError(True)
 pw.setNode(PYWAVES_TEST_NODE, 'T')
 helpers = Helpers()
 
@@ -34,17 +33,18 @@ def test_mainnetAddressCreationByAddress():
 
 def test_mainnetAddressCreationWithInvalidAddress():
     pw.setNode('https://nodes.wavesnodes.com', 'W')
-    with pytest.raises(ValueError) as valueError:
+    with pytest.raises(PyWavesException) as error:
         address.Address(address = '3RAjhruvziPqhkeixrejgzdtWrQY1eUTjB')
 
-    assert str(valueError) == '<ExceptionInfo ValueError(\'Invalid address\') tblen=2>'
+    assert str(error.value) == 'Invalid address'
+
 
 def test_mainnetAddressCreationWithEmptyPrivateKey():
     pw.setNode('https://nodes.wavesnodes.com', 'W')
-    with pytest.raises(ValueError) as valueError:
+    with pytest.raises(Exception) as error:
         address.Address()
 
-    assert str(valueError) == '<ExceptionInfo ValueError(\'Empty private key not allowed\') tblen=2>'
+    assert str(error.value) == 'Empty private key not allowed'
 
 def test_testnetAddressCreationBySeed():
     pw.setNode('https://nodes-testnet.wavesnodes.com', 'T')
@@ -78,17 +78,17 @@ def test_mainnetWithNonce():
 
 def test_mainnetWithNegativeNonce():
     pw.setNode('https://nodes.wavesnodes.com', 'W')
-    with pytest.raises(ValueError) as valueError:
+    with pytest.raises(Exception) as error:
         address.Address(seed='this is just a dummy test seed', nonce=-5)
 
-    assert str(valueError) == '<ExceptionInfo ValueError(\'Nonce must be between 0 and 4294967295\') tblen=2>'
+    assert str(error.value) == 'Nonce must be between 0 and 4294967295'
 
 def test_mainnetWithHugeNonce():
     pw.setNode('https://nodes.wavesnodes.com', 'W')
-    with pytest.raises(ValueError) as valueError:
+    with pytest.raises(Exception) as error:
         address.Address(seed='this is just a dummy test seed', nonce=4294967297)
 
-    assert str(valueError) == '<ExceptionInfo ValueError(\'Nonce must be between 0 and 4294967295\') tblen=2>'
+    assert str(error.value) == 'Nonce must be between 0 and 4294967295'
 
 def test_resetNodetoTestnet():
     pw.setNode(PYWAVES_TEST_NODE, 'T')

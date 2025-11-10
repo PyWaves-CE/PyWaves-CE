@@ -6,26 +6,25 @@ import string
 import pytest
 import os
 
-pw.setThrowOnError(True)
-
-PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
-pw.setNode(PYWAVES_TEST_NODE, 'T')
-
 helpers = Helpers()
-testwallet = helpers.prepareTestcase()
-alias = ''.join(random.choices(string.ascii_lowercase, k=8))
-
-seed = pw.b58encode(os.urandom(32))
-address1 = address.Address(seed=seed)
 
 try:
+
+    def test_prepareTestcase():
+        global testwallet, address1, alias
+        testwallet = helpers.prepareTestcase()
+        alias = ''.join(random.choices(string.ascii_lowercase, k=8))
+        seed = pw.b58encode(os.urandom(32))
+        address1 = address.Address(seed=seed)
+        assert testwallet is not None
+        assert address1 is not None
 
     def test_aliasWithoutPrivateKey():
         myAddress = address.Address(address1.address)
         with pytest.raises(Exception) as error:
             myAddress.createAlias(alias)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Private key required\') tblen=3>'
+        assert str(error.value) == 'Private key required'
 
     def test_succesfullAlias():
         tx = testwallet.createAlias(alias)

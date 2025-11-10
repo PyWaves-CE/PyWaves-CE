@@ -6,22 +6,22 @@ import os
 import random
 import string
 
-PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
-
-pw.setThrowOnError(True)
-pw.setNode(PYWAVES_TEST_NODE, 'T')
-
 helpers = Helpers()
-testwallet = helpers.prepareTestcase(201000000)
 
-seed = pw.b58encode(os.urandom(32))
-address1 = address.Address(seed=seed)
-
-assetName = ''.join(random.choices(string.ascii_lowercase, k=8))
-token = testwallet.issueAsset(assetName, f"Test Token {assetName}", 100*(10**8), 8, reissuable=True)
-pw.waitFor(token['id'])
-    
 try:
+
+    def test_prepareTestcase():
+        global testwallet, address1, token
+        testwallet = helpers.prepareTestcase(201000000)
+        seed = pw.b58encode(os.urandom(32))
+        address1 = address.Address(seed=seed)
+        assetName = ''.join(random.choices(string.ascii_lowercase, k=8))
+        token = testwallet.issueAsset(assetName, f"Test Token {assetName}", 100*(10**8), 8, reissuable=True)
+        pw.waitFor(token['id'])
+
+        assert testwallet is not None
+        assert address1 is not None
+        assert token is not None
 
     def test_sponsoringAssetWithoutPrivateKey():
         myAddress = address.Address(address1.address)

@@ -5,16 +5,22 @@ from pywaves import asset
 import pytest
 import os
 
-pw.setThrowOnError(True)
 helpers = Helpers()
-testwallet = helpers.prepareTestcase()
-
-seed = pw.b58encode(os.urandom(32))
-recipient1 = address.Address(seed=seed)
-seed = pw.b58encode(os.urandom(32))
-recipient2 = address.Address(seed=seed)
 
 try:
+    def test_prepareTestcase():
+        global testwallet, recipient1, recipient2
+        testwallet = helpers.prepareTestcase()
+        seed = pw.b58encode(os.urandom(32))
+        recipient1 = address.Address(seed=seed)
+        seed = pw.b58encode(os.urandom(32))
+        recipient2 = address.Address(seed=seed)
+
+        assert testwallet is not None
+        assert recipient1 is not None
+        assert recipient2 is not None
+
+
     def test_massTransferWithoutPrivateKey():
         myAddress = address.Address('3MwGH6GPcq7jiGNXgS4K6buynpLZR5LAgQm')
         transfers = [
@@ -25,7 +31,7 @@ try:
         with pytest.raises(Exception) as error:
             myAddress.massTransferWaves(transfers)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Private key required\') tblen=3>'
+        assert str(error.value) == 'Private key required'
 
     def test_massTransferWithoutEnoughWaves():
         transfers = [
@@ -36,7 +42,7 @@ try:
         with pytest.raises(Exception) as error:
             testwallet.massTransferWaves(transfers)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Insufficient Waves balance\') tblen=3>'
+        assert str(error.value) == 'Insufficient Waves balance'
 
     def test_succesfullMassTransfer():
         transfers = [
@@ -185,7 +191,7 @@ try:
         with pytest.raises(Exception) as error:
             testwallet.massTransferWaves(transfers)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Too many recipients\') tblen=3>'
+        assert str(error.value) == 'Too many recipients'
     
     def test_closeTestcase():
         print("----- Closing testcase -----")

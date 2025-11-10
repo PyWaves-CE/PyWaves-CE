@@ -5,19 +5,17 @@ from pywaves import asset
 import pytest
 import os
 
-PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
-
-pw.setThrowOnError(True)
-pw.setNode(PYWAVES_TEST_NODE, 'T')
-
 helpers = Helpers()
-testwallet = helpers.prepareTestcase(1500000)
-
-seed = pw.b58encode(os.urandom(32))
-address1 = address.Address(seed=seed)
-
 
 try:
+    def test_prepareTestcase():
+        global testwallet, address1
+        testwallet = helpers.prepareTestcase(1500000)
+        seed = pw.b58encode(os.urandom(32))
+        address1 = address.Address(seed=seed)
+        assert testwallet is not None
+        assert address1 is not None
+
     def test_setScriptWithoutPrivateKey():
         myAddress = address.Address(address1.address)
         scriptSource =  '{-# STDLIB_VERSION 5 #-}\n' \

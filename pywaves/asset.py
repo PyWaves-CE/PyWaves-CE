@@ -1,4 +1,5 @@
 import pywaves as pw
+from pywaves import PyWavesException
 import logging
 
 class Asset(object):
@@ -139,12 +140,9 @@ class AssetPair(object):
         if len(args)==1:
             limit = args[0]
             if limit > 0 and limit <= self.pywaves.MAX_WDF_REQUEST:
-                #return self._getMarketData('/api/trades/', '%d' % limit)
                 return self._getAPIData('/v0/transactions/exchange?amountAsset=' + amountAssetId + '&priceAsset=' + priceAssetId + '&limit=' + str(limit))
             else:
-                msg = 'Invalid request. Limit must be >0 and <= 100'
-                self.pywaves.throw_error(msg)
-                return logging.error(msg)
+                raise PyWavesException('Invalid request. Limit must be >0 and <= 100')
         elif len(args)==2:
             fromTimestamp = args[0]
             toTimestamp = args[1]
@@ -155,26 +153,17 @@ class AssetPair(object):
         if len(args)==2:
             timeframe = args[0]
             limit = args[1]
-            if timeframe not in self.pywaves.VALID_TIMEFRAMES:
-                msg = 'Invalid timeframe'
-                self.pywaves.throw_error(msg)
-                return logging.error(msg)
-            elif limit > 0 and limit <= self.pywaves.MAX_WDF_REQUEST:
+            self.pywaves.timefraneMustBeValid(timeframe)
+            if limit > 0 and limit <= self.pywaves.MAX_WDF_REQUEST:
                 return self._getMarketData('/candles', '%d/%d' % (timeframe, limit))
             else:
-                msg = 'Invalid request. Limit must be >0 and <= 100'
-                self.pywaves.throw_error(msg)
-                return logging.error(msg)
+                raise PyWavesException('Invalid request. Limit must be >0 and <= 100')
         elif len(args)==3:
             timeframe = args[0]
             fromTimestamp = args[1]
             toTimestamp = args[2]
-            if timeframe not in self.pywaves.VALID_TIMEFRAMES:
-                msg = 'Invalid timeframe'
-                self.pywaves.throw_error(msg)
-                return logging.error(msg)
-            else:
-                return self._getMarketData('/candles', '%d/%d/%d' % (timeframe, fromTimestamp, toTimestamp))
+            self.pywaves.timefraneMustBeValid(timeframe)
+            return self._getMarketData('/candles', '%d/%d/%d' % (timeframe, fromTimestamp, toTimestamp))
 
     __repr__ = __str__
 

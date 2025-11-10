@@ -8,35 +8,43 @@ import random
 import string
 
 PYWAVES_TEST_SECRET = os.getenv('PYWAVES_TEST_SECRET')
-
-pw.setThrowOnError(True)
 helpers = Helpers()
-testwallet = helpers.prepareTestcase(101000000, sendTokens=True)
-
-seed = pw.b58encode(os.urandom(32))
-recipient1 = address.Address(seed=seed)
-seed = pw.b58encode(os.urandom(32))
-recipient2 = address.Address(seed=seed)
-# use test asset
-faucet = address.Address(privateKey=PYWAVES_TEST_SECRET)
-assets = faucet.assets()
-myToken = asset.Asset(assets[0])
-# create an address with no balance
-seed = pw.b58encode(os.urandom(32))
-addressWithNoBalance = address.Address(seed=seed)
-# add an extra 1 wves funding to the testwallet
-
-print(f"----- Issuing smart asset -----")
-# issue a smart asset
-smartAssetName = ''.join(random.choices(string.ascii_lowercase, k=8))
-script = 'match tx { \n' + \
-                'case _ => true\n' + \
-                '}'
-tx = testwallet.issueAsset(smartAssetName, f"Test Token {smartAssetName}", 100, 8, reissuable=True)
-pw.waitFor(tx['id'])
-mySmartAsset = asset.Asset(tx['id'])
 
 try:
+    def test_prepareTestcase():
+        global testwallet, recipient1, recipient2, myToken, addressWithNoBalance, smartAssetName, mySmartAsset
+        testwallet = helpers.prepareTestcase(101000000, sendTokens=True)
+        seed = pw.b58encode(os.urandom(32))
+        recipient1 = address.Address(seed=seed)
+        seed = pw.b58encode(os.urandom(32))
+        recipient2 = address.Address(seed=seed)
+        # use test asset
+        faucet = address.Address(privateKey=PYWAVES_TEST_SECRET)
+        assets = faucet.assets()
+        myToken = asset.Asset(assets[0])
+        # create an address with no balance
+        seed = pw.b58encode(os.urandom(32))
+        addressWithNoBalance = address.Address(seed=seed)
+        # add an extra 1 wves funding to the testwallet
+
+        print(f"----- Issuing smart asset -----")
+        # issue a smart asset
+        smartAssetName = ''.join(random.choices(string.ascii_lowercase, k=8))
+        script = 'match tx { \n' + \
+                        'case _ => true\n' + \
+                        '}'
+        tx = testwallet.issueAsset(smartAssetName, f"Test Token {smartAssetName}", 100, 8, reissuable=True)
+        pw.waitFor(tx['id'])
+        mySmartAsset = asset.Asset(tx['id'])
+
+        assert testwallet is not None
+        assert recipient1 is not None
+        assert recipient2 is not None
+        assert myToken is not None
+        assert addressWithNoBalance is not None
+        assert smartAssetName is not None
+        assert mySmartAsset is not None
+
     def test_assetMassTransferWithoutPrivateKey():
         myAddress = address.Address('3MwGH6GPcq7jiGNXgS4K6buynpLZR5LAgQm')
         transfers = [
@@ -46,7 +54,7 @@ try:
         with pytest.raises(Exception) as error:
             myAddress.massTransferAssets(transfers, myToken)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Private key required\') tblen=3>'
+        assert str(error.value) == 'Private key required'
 
     def test_assetMassTransferWithTooMuchRecipients():    
         transfers = [
@@ -214,7 +222,7 @@ try:
         with pytest.raises(Exception) as error:
             testwallet.massTransferAssets(transfers, myToken)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Too many recipients\') tblen=3>'
+        assert str(error.value) == 'Too many recipients'
 
     def test_feeIsBiggerThanAmountMassTransfer():
         transfers = [
@@ -225,7 +233,7 @@ try:
         with pytest.raises(Exception) as error:
             addressWithNoBalance.massTransferAssets(transfers, myToken)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Insufficient Waves balance\') tblen=3>'
+        assert str(error.value) == 'Insufficient Waves balance'
 
     def test_amountIsBiggerThanBalanceMassTransfer():
         transfers = [
@@ -236,7 +244,7 @@ try:
         with pytest.raises(Exception) as error:
             testwallet.massTransferAssets(transfers, myToken)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Insufficient Asset balance\') tblen=3>'
+        assert str(error.value) == 'Insufficient Asset balance'
 
     def test_succesfullAssetMassTransfer():
         transfers = [

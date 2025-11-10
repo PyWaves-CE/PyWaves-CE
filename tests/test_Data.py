@@ -5,18 +5,19 @@ from pywaves import asset
 import os
 import pytest
 
-PYWAVES_TEST_NODE = os.getenv('PYWAVES_TEST_NODE')
-
-pw.setThrowOnError(True)
-pw.setNode(PYWAVES_TEST_NODE, 'T')
-
 helpers = Helpers()
-testwallet = helpers.prepareTestcase(100000000)
 
-seed = pw.b58encode(os.urandom(32))
-address1 = address.Address(seed=seed)
 
 try:
+    def test_prepareTestcase():
+        global testwallet, address1
+        testwallet = helpers.prepareTestcase(100000000)
+        seed = pw.b58encode(os.urandom(32))
+        address1 = address.Address(seed=seed)
+
+        assert testwallet is not None
+        assert address1 is not None
+
     def test_issueAssetWithoutPrivateKey():
         with pytest.raises(Exception) as error:
             myAddress = address.Address(address1.address)            
@@ -27,7 +28,7 @@ try:
             }]
             tx = myAddress.dataTransaction(data)
        
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Private key required\') tblen=3>'
+        assert str(error.value) == 'Private key required'
 
     def test_dataTransactionWithInsufficientWavesBalance():
         with pytest.raises(Exception) as error:
@@ -38,7 +39,7 @@ try:
             }]
             tx = address1.dataTransaction(data)
 
-        assert str(error) == '<ExceptionInfo PyWavesException(\'Insufficient Waves balance\') tblen=3>'
+        assert str(error.value) == 'Insufficient Waves balance'
    
     def test_stringDataTransaction():
         data = [{

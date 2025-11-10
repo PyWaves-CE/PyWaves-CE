@@ -200,14 +200,14 @@ class Address(object):
         self.txSigner = pw.TxSigner(pywaves)
         self.txGenerator = pw.TxGenerator(pywaves)
         if nonce < 0 or nonce > 4294967295:
-            raise ValueError('Nonce must be between 0 and 4294967295')
+            pw.throwException('Nonce must be between 0 and 4294967295')
         if seed:
             self._generate(seed=seed, nonce=nonce)
         elif publicKey:
             self._generate(publicKey=publicKey)
         elif address:
             if not self.pywaves.validateAddress(address):
-                raise ValueError("Invalid address")
+                pw.throwException("Invalid address")
             else:
                 self.address = address
                 self.publicKey = publicKey
@@ -222,7 +222,7 @@ class Address(object):
             self.nonce = 0
         elif privateKey == '' or privateKey:
             if len(privateKey) == 0:
-                raise ValueError('Empty private key not allowed')
+                pw.throwException('Empty private key not allowed')
             else:
                 self._generate(privateKey=privateKey)
         else:
@@ -317,21 +317,15 @@ class Address(object):
             self.privateKey = pw.b58encode(privKey)
 
     def issueAsset(self, name, description, quantity, decimals=0, reissuable=False, txFee=pw.DEFAULT_ASSET_FEE, timestamp=0):
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif len(name) < 4 or len(name) > 16:
-            msg = 'Asset name must be between 4 and 16 characters long'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        else:
-            if timestamp == 0:
-                timestamp = int(time.time() * 1000)
-            tx = self.txGenerator.generateIssueAsset(name, description, quantity, self.publicKey, decimals, reissuable, txFee, timestamp)
-            self.txSigner.signTx(tx, self.privateKey)
-            return self.broadcastTx(tx)
-            
+        self.pywaves.requirePrivateKey(self)
+        self.pywaves.assetNameMustBeValid(name)
+        
+        if timestamp == 0:
+            timestamp = int(time.time() * 1000)
+        tx = self.txGenerator.generateIssueAsset(name, description, quantity, self.publicKey, decimals, reissuable, txFee, timestamp)
+        self.txSigner.signTx(tx, self.privateKey)
+        return self.broadcastTx(tx)
+        
     def reissueAsset(self, asset, quantity, reissuable=False, txFee=pw.DEFAULT_TX_FEE, timestamp=0):
         if timestamp == 0:
             timestamp = int(time.time() * 1000)
@@ -343,44 +337,42 @@ class Address(object):
     def burnAsset(self, asset, quantity, txFee=pw.DEFAULT_TX_FEE, timestamp=0):
         if timestamp == 0:
             timestamp = int(time.time() * 1000)
-
         tx = self.txGenerator.generateBurnAsset(asset, quantity, self.publicKey, txFee, timestamp)
         self.txSigner.signTx(tx, self.privateKey)
         return self.broadcastTx(tx)
         
     def broadcastTx(self, tx):
         data = json.dumps(tx)
-
         return self.pywaves.wrapper('/transactions/broadcast', data)
 
     def sendWaves(self, recipient, amount, attachment='', txFee=pw.DEFAULT_TX_FEE, timestamp=0):
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
+        self.pywaves.requirePrivateKey(self)
+        self.pywaves.amountMustBePositive(amount)
+        self.pywaves.isWavesBalanceEnough(self, amount + txFee)
+        
+        if timestamp == 0:
+            timestamp = int(time.time() * 1000)
+        tx = self.txGenerator.generateSendWaves(recipient, amount, self.publicKey, attachment, txFee, timestamp)
+        self.signTx(tx)
+        tx['attachment'] = pw.b58encode(crypto.str2bytes(attachment))
 
-        elif amount <= 0:
-            msg = 'Amount must be > 0'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif not self.pywaves.OFFLINE and self.balance() < amount + txFee:
-            msg = 'Insufficient Waves balance'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-
-        else:
-            if timestamp == 0:
-                timestamp = int(time.time() * 1000)
-
-            tx = self.txGenerator.generateSendWaves(recipient, amount, self.publicKey, attachment, txFee, timestamp)
-            self.signTx(tx)
-            tx['attachment'] = pw.b58encode(crypto.str2bytes(attachment))
-
-            return self.broadcastTx(tx)
+        return self.broadcastTx(tx)
 
     def signTx(self, tx):
         self.txSigner.signTx(tx, self.privateKey)
 
+    def wavesBalance(self):
+        """
+        Retrieves the detailed balance information for this address from the Waves node.
+
+        Returns:
+            dict: A dictionary containing the balances as returned by the node.
+                  Example keys: 'regular', 'available', 'effective', 'generating'
+        """
+        endpoint = f"/addresses/balance/details/{self.address}"
+        result = self.pywaves.wrapper(endpoint)
+        return result
+        
     def massTransferWaves(self, transfers, attachment='', timestamp=0, baseFee=pw.DEFAULT_BASE_FEE):
         txFee = baseFee + (math.ceil((len(transfers) + 1) / 2 - 0.5)) * baseFee
         txFee += self.script()['extraFee']
@@ -389,21 +381,12 @@ class Address(object):
         for i in range(0, len(transfers)):
             totalAmount += transfers[i]['amount']
 
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif len(transfers) > 100:
-            msg = 'Too many recipients'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif not self.pywaves.OFFLINE and self.balance() < totalAmount + txFee:
-            msg = 'Insufficient Waves balance'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        else:
-            if timestamp == 0:
-                timestamp = int(time.time() * 1000)
+        self.pywaves.requirePrivateKey(self)
+        self.pywaves.tooManyRecipientsForMassTransfer(transfers)
+        self.pywaves.isWavesBalanceEnough(self, totalAmount + txFee)
+        
+        if timestamp == 0:
+            timestamp = int(time.time() * 1000)
 
             tx = self.txGenerator.generateMassTransferWaves(transfers, self.publicKey, attachment, timestamp, txFee)
             self.txSigner.signTx(tx, self.privateKey)
@@ -411,31 +394,17 @@ class Address(object):
 
             return self.broadcastTx(tx)
 
-    def sendAsset(self, recipient, asset, amount, attachment='', feeAsset='', txFee=pw.DEFAULT_TX_FEE, timestamp=0):
-        if len(self.privateKey) < 10:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif not self.pywaves.OFFLINE and asset and not asset.status():
-            msg = 'Asset not issued'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif amount <= 0:
-            msg = 'Amount must be > 0'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif not self.pywaves.OFFLINE and asset and self.balance(asset.assetId) < amount:
-            msg = 'Insufficient asset balance'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
+    def sendAsset(self, recipient, asset, amount, attachment='', feeAsset=None, txFee=pw.DEFAULT_TX_FEE, timestamp=0):
+        self.pywaves.requirePrivateKey(self)
+        self.pywaves.amountMustBePositive(amount)
+        self.pywaves.assetMustBeIssued(self, asset)
+        
+        if not self.pywaves.OFFLINE and asset and self.balance(asset.assetId) < amount:
+            pw.throwException('Insufficient Asset balance')
         elif not self.pywaves.OFFLINE and not asset and self.balance() < amount:
-            msg = 'Insufficient Waves balance'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
+            pw.throwException('Insufficient Waves balance')
         elif not self.pywaves.OFFLINE and feeAsset and self.balance(feeAsset.assetId) < txFee:
-            msg = 'Insufficient asset balance for fee'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
+            pw.throwException('Insufficient Asset balance for fee')
         else:
             if feeAsset:
                 feeInfos = self.pywaves.wrapper('/assets/details/' + feeAsset.assetId)
@@ -448,9 +417,9 @@ class Address(object):
             else:
                 tx = self.txGenerator.generateSendAsset(recipient, asset, amount, self.publicKey, attachment, feeAsset=None, txFee=txFee, timestamp=timestamp)
 
-            self.signTx(tx)
+        self.signTx(tx)
 
-            return self.broadcastTx(tx)
+        return self.broadcastTx(tx)
 
     def massTransferAssets(self, transfers, asset, attachment='', timestamp=0, baseFee=pw.DEFAULT_BASE_FEE,
                            smartFee=pw.DEFAULT_SMART_FEE):
@@ -465,66 +434,39 @@ class Address(object):
 
         for transfer in transfers:
             totalAmount += transfer['amount']
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif len(transfers) > 100:
-            msg = 'Too many recipients'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif not self.pywaves.OFFLINE and self.balance() < txFee:
-            msg = 'Insufficient Waves balance'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        if not self.pywaves.OFFLINE and self.balance(assetId=asset.assetId) < totalAmount:
-            msg = 'Insufficient Asset balance'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        else:
-            if timestamp == 0:
-                timestamp = int(time.time() * 1000)
+        self.pywaves.requirePrivateKey(self)
+        self.pywaves.tooManyRecipientsForMassTransfer(transfers)
+        self.pywaves.isWavesBalanceEnough(self, txFee)
+        self.pywaves.isAssetBalanceEnough(self, asset, totalAmount)
+        
+        if timestamp == 0:
+            timestamp = int(time.time() * 1000)
 
-            tx = self.txGenerator.generateMassTransferAssets(transfers, asset, self.publicKey, attachment, timestamp, txFee)
-            self.txSigner.signTx(tx, self.privateKey)
+        tx = self.txGenerator.generateMassTransferAssets(transfers, asset, self.publicKey, attachment, timestamp, txFee)
+        self.txSigner.signTx(tx, self.privateKey)
 
-            return self.broadcastTx(tx)
+        return self.broadcastTx(tx)
 
     def dataTransaction(self, data, timestamp=0, baseFee=pw.DEFAULT_BASE_FEE, minimalFee=500000):
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif not self.pywaves.OFFLINE and self.balance() < minimalFee:
-            msg = 'Insufficient Waves balance'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)        
-        else:
-            tx = self.txGenerator.generateDatatransaction(data, self.publicKey, timestamp, baseFee, minimalFee)
-            self.txSigner.signTx(tx, self.privateKey)
+        self.pywaves.requirePrivateKey(self)
+        self.pywaves.isWavesBalanceEnough(self, minimalFee)
 
-            return self.broadcastTx(tx)
+        tx = self.txGenerator.generateDatatransaction(data, self.publicKey, timestamp, baseFee, minimalFee)
+        self.txSigner.signTx(tx, self.privateKey)
+
+        return self.broadcastTx(tx)
 
     def deleteDataEntry(self, key, timestamp=0, minimalFee=500000):
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif not self.pywaves.OFFLINE and self.balance() < minimalFee:
-            msg = 'Insufficient Waves balance'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)        
-        else:
-            tx = self.txGenerator.generateDeleteDataEntry(key, self.publicKey, timestamp, minimalFee)
-            self.txSigner.signTx(tx, self.privateKey)
+        self.pywaves.requirePrivateKey(self)
+        self.pywaves.isWavesBalanceEnough(self, minimalFee)
 
-            return self.broadcastTx(tx)
+        tx = self.txGenerator.generateDeleteDataEntry(key, self.publicKey, timestamp, minimalFee)
+        self.txSigner.signTx(tx, self.privateKey)
+
+        return self.broadcastTx(tx)
 
     def _postOrder(self, amountAsset, priceAsset, orderType, amount, price, maxLifetime=30 * 86400, matcherFee=pw.DEFAULT_MATCHER_FEE, timestamp=0, matcherFeeAssetId=''):
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
+        self.pywaves.requirePrivateKey(self)
         if timestamp == 0:
             timestamp = int(time.time() * 1000)
         expiration = timestamp + maxLifetime * 1000
@@ -566,9 +508,7 @@ class Address(object):
         id = -1
         if 'status' in req:
             if req['status'] == 'OrderRejected':
-                msg = 'Order Rejected - %s' % req['message']
-                logging.error(msg)
-                self.pywaves.throw_error(msg)
+                pw.throwException('Order Rejected - %s' % req['message'])
             elif req['status'] == 'OrderAccepted':
                 id = req['message']['id']
                 logging.info('Order Accepted - ID: %s' % id)
@@ -579,13 +519,9 @@ class Address(object):
     def cancelOrder(self, assetPair, order):
         if not self.pywaves.OFFLINE:
             if order.status() == 'Filled':
-                msg = "Order already filled"
-                logging.error(msg)
-                self.pywaves.throw_error(msg)
+                pw.throwException("Order already filled")
             elif order.status() == 'NotFound':
-                msg = "Order not found"
-                logging.error(msg)
-                self.pywaves.throw_error(msg)
+                pw.throwException("Order not found")
         sData = pw.b58decode(self.publicKey) + \
                 pw.b58decode(order.orderId)
         signature = crypto.sign(self.privateKey, sData)
@@ -668,44 +604,29 @@ class Address(object):
             return amountBalance, priceBalance
 
     def lease(self, recipient, amount, txFee=pw.DEFAULT_LEASE_FEE, timestamp=0):
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif amount <= 0:
-            msg = 'Amount must be > 0'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif not self.pywaves.OFFLINE and self.balance() < amount + txFee:
-            msg = 'Insufficient Waves balance'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        else:
-            if timestamp == 0:
-                timestamp = int(time.time() * 1000)
+        self.pywaves.requirePrivateKey(self)
+        self.pywaves.amountMustBePositive(amount)
+        self.pywaves.isWavesBalanceEnough(self, amount + txFee)
+        
+        if timestamp == 0:
+            timestamp = int(time.time() * 1000)
 
-            tx = self.txGenerator.generateLease(recipient, amount, self.publicKey, txFee, timestamp)
-            self.txSigner.signTx(tx, self.privateKey)
+        tx = self.txGenerator.generateLease(recipient, amount, self.publicKey, txFee, timestamp)
+        self.txSigner.signTx(tx, self.privateKey)
 
-            return self.broadcastTx(tx)
+        return self.broadcastTx(tx)
 
     def leaseCancel(self, leaseId, txFee=pw.DEFAULT_LEASE_FEE, timestamp=0):
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif not self.pywaves.OFFLINE and self.balance() < txFee:
-            msg = 'Insufficient Waves balance'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        else:
-            if timestamp == 0:
-                timestamp = int(time.time() * 1000)
+        self.pywaves.requirePrivateKey(self)
+        self.pywaves.isWavesBalanceEnough(self, txFee)
+        
+        if timestamp == 0:
+            timestamp = int(time.time() * 1000)
 
-            tx = self.txGenerator.generateLeaseCancel(leaseId, self.publicKey, txFee, timestamp)
-            self.txSigner.signTx(tx, self.privateKey)
+        tx = self.txGenerator.generateLeaseCancel(leaseId, self.publicKey, txFee, timestamp)
+        self.txSigner.signTx(tx, self.privateKey)
 
-            return self.broadcastTx(tx)
+        return self.broadcastTx(tx)
 
     def getOrderHistory(self, assetPair, timestamp=0):
         if timestamp == 0:
@@ -744,43 +665,31 @@ class Address(object):
                                      host=self.pywaves.MATCHER)
 
     def createAlias(self, alias, txFee=pw.DEFAULT_ALIAS_FEE, timestamp=0):
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        else:
-            if timestamp == 0:
-                timestamp = int(time.time() * 1000)
+        self.pywaves.requirePrivateKey(self)
+        if timestamp == 0:
+            timestamp = int(time.time() * 1000)
 
-            tx = self.txGenerator.generateAlias(alias, self.publicKey, txFee, timestamp)
-            self.txSigner.signTx(tx, self.privateKey)
-            return self.broadcastTx(tx)
+        tx = self.txGenerator.generateAlias(alias, self.publicKey, txFee, timestamp)
+        self.txSigner.signTx(tx, self.privateKey)
+        return self.broadcastTx(tx)
 
     def sponsorAsset(self, assetId, minimalFeeInAssets, txFee=pw.DEFAULT_SPONSOR_FEE, timestamp=0):
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        else:
-            if timestamp == 0:
-                timestamp = int(time.time() * 1000)
+        self.pywaves.requirePrivateKey(self)
+        if timestamp == 0:
+            timestamp = int(time.time() * 1000)
 
-            tx = self.txGenerator.generateSponsorAsset(assetId, minimalFeeInAssets, self.publicKey, txFee, timestamp)
-            self.txSigner.signTx(tx, self.privateKey)
-            return self.broadcastTx(tx)
+        tx = self.txGenerator.generateSponsorAsset(assetId, minimalFeeInAssets, self.publicKey, txFee, timestamp)
+        self.txSigner.signTx(tx, self.privateKey)
+        return self.broadcastTx(tx)
 
     def setCompiledScript(self, script, txFee=pw.DEFAULT_SCRIPT_FEE, timestamp=0, publicKey=None):
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        else:
-            if timestamp == 0:
-                timestamp = int(time.time() * 1000)
+        self.pywaves.requirePrivateKey(self)
+        if timestamp == 0:
+            timestamp = int(time.time() * 1000)
 
-            tx = self.txGenerator.generateSetScript(script, self.publicKey, txFee, timestamp)
-            self.txSigner.signTx(tx, self.privateKey)
-            return self.broadcastTx(tx)
+        tx = self.txGenerator.generateSetScript(script, self.publicKey, txFee, timestamp)
+        self.txSigner.signTx(tx, self.privateKey)
+        return self.broadcastTx(tx)
 
     def setScript(self, scriptSource, txFee=pw.DEFAULT_SCRIPT_FEE, timestamp=0, publicKey=None):
         script = self.pywaves.wrapper('/utils/script/compileCode', scriptSource)['script'][7:]
@@ -789,11 +698,8 @@ class Address(object):
 
     def setAssetScript(self, asset, scriptSource, txFee=pw.DEFAULT_ASSET_SCRIPT_FEE, timestamp=0):
         script = self.pywaves.wrapper('/utils/script/compileCode', scriptSource)['script'][7:]
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        else:
+        self.pywaves.requirePrivateKey(self)
+        if timestamp == 0:
             '''compiledScript = base64.b64decode(script)
             scriptLength = len(compiledScript)'''
             if timestamp == 0:
@@ -805,44 +711,31 @@ class Address(object):
 
     def issueSmartAsset(self, name, description, quantity, scriptSource, decimals=0, reissuable=False, txFee=pw.DEFAULT_ASSET_FEE, timestamp=0):
         if self.pywaves.OFFLINE:
-            msg = 'PyWaves currently offline'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
+            pw.throwException('PyWaves currently offline')
         script = self.pywaves.wrapper('/utils/script/compileCode', scriptSource)['script'][7:]
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        elif len(name) < 4 or len(name) > 16:
-            msg = 'Asset name must be between 4 and 16 characters long'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        else:
-            '''compiledScript = base64.b64decode(script)
-            scriptLength = len(compiledScript)'''
-            if timestamp == 0:
-                timestamp = int(time.time() * 1000)
+        self.pywaves.requirePrivateKey(self)
+        self.pywaves.assetNameMustBeValid(name)
+        '''compiledScript = base64.b64decode(script)
+        scriptLength = len(compiledScript)'''
+        if timestamp == 0:
+            timestamp = int(time.time() * 1000)
 
-            tx = self.txGenerator.generateIssueSmartAsset(name, description, quantity, scriptSource, self.publicKey, decimals, reissuable, txFee, timestamp)
-            self.txSigner.signTx(tx, self.privateKey)
-            return self.broadcastTx(tx)
+        tx = self.txGenerator.generateIssueSmartAsset(name, description, quantity, scriptSource, self.publicKey, decimals, reissuable, txFee, timestamp)
+        self.txSigner.signTx(tx, self.privateKey)
+        return self.broadcastTx(tx)
 
     def invokeScript(self, dappAddress, functionName, params = [], payments = [], feeAsset=None, txFee=pw.DEFAULT_INVOKE_SCRIPT_FEE, publicKey=None, timestamp=0):
-        if not self.privateKey:
-            msg = 'Private key required'
-            logging.error(msg)
-            self.pywaves.throw_error(msg)
-        else:
-            if timestamp == 0:
-                timestamp = int(time.time() * 1000)
+        self.pywaves.requirePrivateKey(self)
+        if timestamp == 0:
+            timestamp = int(time.time() * 1000)
 
-            if not publicKey:
-                publicKey = self.publicKey
+        if not publicKey:
+            publicKey = self.publicKey
 
-            tx = self.txGenerator.generateInvokeScript(dappAddress, functionName, publicKey, params, payments, feeAsset, txFee, timestamp)
-            self.txSigner.signTx(tx, self.privateKey)
-            
-            return self.broadcastTx(tx)
+        tx = self.txGenerator.generateInvokeScript(dappAddress, functionName, publicKey, params, payments, feeAsset, txFee, timestamp)
+        self.txSigner.signTx(tx, self.privateKey)
+        
+        return self.broadcastTx(tx)
             
     def updateAssetInfo(self, assetId, name, description, timestamp=0):
         if timestamp == 0:
