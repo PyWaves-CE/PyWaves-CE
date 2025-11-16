@@ -377,3 +377,6 @@ class TxGenerator:
             }
 
         return tx
+
+    def validateTx(self, tx):
+        return self.pywaves.wrapper('/debug/validate', tx)

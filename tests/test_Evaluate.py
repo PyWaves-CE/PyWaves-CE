@@ -25,7 +25,7 @@ try:
         tx = generator.generateSendWaves(address.Address('3MuqNWyf4RMWz3cqDi4QZRVr9v76LKMjNVZ'), 100000, testwallet.publicKey)    
         signer.signTx(tx, testwallet.privateKey)
         print (json.dumps(tx, indent=4))
-        v = generator.validateTX(json.dumps(tx))
+        v = generator.validateTx(json.dumps(tx))
         assert v['valid'] == True
 
     def test_validateTX_invalid():
@@ -35,7 +35,7 @@ try:
         tx['timestamp'] = tx['timestamp'] - 1000000000000
         signer.signTx(tx, testwallet.privateKey)
         #print (json.dumps(tx, indent=4))
-        v = generator.validateTX(json.dumps(tx))
+        v = generator.validateTx(json.dumps(tx))
         assert v['valid'] == False        
 
     def test_closeTestcase():
