@@ -379,4 +379,9 @@ class TxGenerator:
         return tx
 
     def validateTx(self, tx):
-        return self.pywaves.wrapper('/debug/validate', tx)
+        endpoint = f"/debug/validate"
+        return self.pywaves.wrapper(endpoint, tx)
+
+    def evaluateScript(self, address,script):
+        endpoint = f"/utils/script/evaluate/{address}"        
+        return self.pywaves.wrapper(endpoint, script)

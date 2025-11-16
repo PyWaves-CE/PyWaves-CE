@@ -16,7 +16,7 @@ try:
 
     def test_prepareTestcase():
         global testwallet 
-        testwallet = helpers.prepareTestcase()        
+        testwallet = helpers.prepareTestcase(10000000)        
         assert testwallet is not None        
 
     def test_validateTX_valid():
@@ -37,6 +37,59 @@ try:
         #print (json.dumps(tx, indent=4))
         v = generator.validateTx(json.dumps(tx))
         assert v['valid'] == False        
+    
+    def test_evaluateScript():
+        script ='{-# STDLIB_VERSION 5 #-}\n' \
+                '{-# CONTENT_TYPE DAPP #-}\n' \
+                '{-# SCRIPT_TYPE ACCOUNT #-}\n' \
+                '\n' \
+                '@Callable(i)\n' \
+                'func storeValue(name: String, value: Int) = {\n' \
+                '[ IntegerEntry(name, value) ]\n' \
+                '}\n' \
+                '\n' \
+                '@Verifier(tx)\n' \
+                'func verify() = sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)\n' \
+                '\n' \
+                '@Callable(i)\n' \
+                'func storeListValue(name: String, value1: List[String], value2: List[Int], value3: List[Boolean]) = {\n' \
+                '[\n' \
+                'StringEntry(name + "_0", value1[0]),\n' \
+                'IntegerEntry(name + "_1", value2[0]),\n' \
+                'BooleanEntry(name + "_2", value3[0]) ]\n' \
+                '}\n' \
+                '\n' \
+                '@Callable(i)\n' \
+                'func storeBinaryValue(name: String, value: ByteVector) = {\n' \
+                '[BinaryEntry(name, value)]\n' \
+                '}\n' \
+                '\n' \
+                '@Callable(i)\n' \
+                'func storeBooleanValue(name: String, value: Boolean) = {\n' \
+                '[BooleanEntry(name, value)]\n' \
+                '}'
+
+        tx = testwallet.setScript(script, txFee=500000)
+        blockchainTx = pw.waitFor(tx['id'])
+        
+        generator = TxGenerator()
+        parameters = [{"type": "string", "value": "test"},
+            {"type": "boolean", "value": True}]
+
+        tx = testwallet.txGenerator.generateInvokeScript(
+            testwallet.address,
+            'storeBooleanValue',
+            testwallet.publicKey,
+            parameters,
+            [],
+            None,
+            txFee=5000000
+        )
+        print(json.dumps(tx))
+        v = testwallet.txGenerator.evaluateScript(testwallet.address, json.dumps(tx))
+        print(v)
+        assert v.get('complexity', None) == 2
+        
 
     def test_closeTestcase():
         print('----- Closing testcase -----')
