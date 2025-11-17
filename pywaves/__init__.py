@@ -49,24 +49,7 @@ ADDRESS_CHECKSUM_LENGTH = 4
 ADDRESS_HASH_LENGTH = 20
 ADDRESS_LENGTH = 1 + 1 + ADDRESS_CHECKSUM_LENGTH + ADDRESS_HASH_LENGTH
 
-<<<<<<< HEAD
-=======
-CHAIN = 'mainnet'
-CHAIN_ID = 'W'
-MATCHER = None
-MATCHER_PUBLICKEY = None
-DATAFEED = None
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler()]
-)
-
-logging.getLogger("pywaves").setLevel(logging.INFO)
-logging.getLogger("requests").setLevel(logging.WARNING)
-
->>>>>>> acf5829 (setMatcher)
 class PyWavesException(Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -137,49 +120,37 @@ class PyWaves(object):
         except:
             self.MATCHER_PUBLICKEY = ''
 
-<<<<<<< HEAD
     def setDatafeed(self, node=None):
         if node is None:
             node = 'https://api.wavesplatform.com'
-        self.DATAFEED = node.rstrip("/")
+        else:
+            node = node.rstrip("/")
+        
+        self.DATAFEED = node
         logging.info('Setting datafeed %s ' % (self.DATAFEED))
 
     def getDatafeed(self):
         return self.DATAFEED
-=======
-def setDatafeed(node):
-    global DATAFEED
-    if node is None:
-        node = 'https://api.wavesplatform.com'
-    else:
-        node = node.rstrip("/")
-    
-    DATAFEED = node
-    logging.info('Setting datafeed %s ' % (DATAFEED))
 
-def getDatafeed():
-    return DATAFEED
-
-def wrapper(api, postData='', host='', headers=''):
-    global OFFLINE
-    if OFFLINE:
-        offlineTx = {}
-        offlineTx['api-type'] = 'POST' if postData else 'GET'
-        offlineTx['api-endpoint'] = api
-        offlineTx['api-data'] = postData
-        return offlineTx
-    if not host:
-        host = NODE
-    if postData:
-        url = '%s%s' % (host, api)
-        #print(f"Making POST request to: {url}")
-        req = requests.post(url, data=postData, headers={'content-type': 'application/json'}).json()
-    else:
-        url = '%s%s' % (host, api)
-        #print(f"Making GET request to: {url}")
-        req = requests.get(url, headers=headers).json()
-    return req
->>>>>>> 653e8e6 (dataFeed)
+    def wrapper(api, postData='', host='', headers=''):
+        global OFFLINE
+        if OFFLINE:
+            offlineTx = {}
+            offlineTx['api-type'] = 'POST' if postData else 'GET'
+            offlineTx['api-endpoint'] = api
+            offlineTx['api-data'] = postData
+            return offlineTx
+        if not host:
+            host = NODE
+        if postData:
+            url = '%s%s' % (host, api)
+            #print(f"Making POST request to: {url}")
+            req = requests.post(url, data=postData, headers={'content-type': 'application/json'}).json()
+        else:
+            url = '%s%s' % (host, api)
+            #print(f"Making GET request to: {url}")
+            req = requests.get(url, headers=headers).json()
+        return req
 
     def _format_json_decode_error(self, response, url, e):
         api_error = {
