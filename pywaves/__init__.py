@@ -129,26 +129,6 @@ class PyWaves(object):
     def getDatafeed(self):
         return self.DATAFEED
 
-    def wrapper(api, postData='', host='', headers=''):
-        global OFFLINE
-        if OFFLINE:
-            offlineTx = {}
-            offlineTx['api-type'] = 'POST' if postData else 'GET'
-            offlineTx['api-endpoint'] = api
-            offlineTx['api-data'] = postData
-            return offlineTx
-        if not host:
-            host = NODE
-        if postData:
-            url = '%s%s' % (host, api)
-            #print(f"Making POST request to: {url}")
-            req = requests.post(url, data=postData, headers={'content-type': 'application/json'}).json()
-        else:
-            url = '%s%s' % (host, api)
-            #print(f"Making GET request to: {url}")
-            req = requests.get(url, headers=headers).json()
-        return req
-
     def _format_json_decode_error(self, response, url, e):
         api_error = {
             'error': 1,  # WrongJson
@@ -225,6 +205,12 @@ class PyWaves(object):
 
     def stateChangesForAddress(self, address, limit = 1000):
         return self.wrapper('/debug/stateChanges/address/' + address + '/limit/' + str(limit))
+
+    def evaluateScript(self, address, script):
+        return self.wrapper('/utils/script/evaluate/%s' % address, postData=script)
+    
+    def validateTx(self, tx):
+        return self.wrapper('/debug/validate', postData=tx)
 
     def getOrderBook(self, assetPair):
         orderBook = assetPair.orderbook()

@@ -3,7 +3,6 @@ from pywaves import address
 import pytest
 import os
 import json
-from pywaves.utils import Utils
 from pywaves.txSigner import TxSigner
 from pywaves.txGenerator import TxGenerator
 from tests.helpers import Helpers
@@ -22,23 +21,21 @@ try:
 
     def test_validateTX_valid():
         txgenerator = TxGenerator()
-        utils = Utils()        
         signer = TxSigner()
         tx = txgenerator.generateSendWaves(address.Address('3MuqNWyf4RMWz3cqDi4QZRVr9v76LKMjNVZ'), 100000, testwallet.publicKey)    
         signer.signTx(tx, testwallet.privateKey)
         print (json.dumps(tx, indent=4))
-        v = utils.validateTx(json.dumps(tx))
+        v = pw.validateTx(json.dumps(tx))
         assert v['valid'] == True
 
     def test_validateTX_invalid():
-        utils = Utils()        
         txgenerator = TxGenerator()
         signer = TxSigner()
         tx = txgenerator.generateSendWaves(address.Address('3MuqNWyf4RMWz3cqDi4QZRVr9v76LKMjNVZ'), 100000, testwallet.publicKey)    
         tx['timestamp'] = tx['timestamp'] - 1000000000000
         signer.signTx(tx, testwallet.privateKey)
         #print (json.dumps(tx, indent=4))
-        v = utils.validateTx(json.dumps(tx))
+        v = pw.validateTx(json.dumps(tx))
         assert v['valid'] == False        
     
     def test_evaluateScript():
@@ -76,7 +73,6 @@ try:
         blockchainTx = pw.waitFor(tx['id'])
         
         txgenerator = TxGenerator()
-        utils = Utils()
         parameters = [{"type": "string", "value": "test"},
             {"type": "boolean", "value": True}]
 
@@ -89,9 +85,7 @@ try:
             None,
             txFee=5000000
         )
-        print(json.dumps(tx))
-        v = utils.evaluateScript(testwallet.address, json.dumps(tx))
-        print(v)
+        v = pw.evaluateScript(testwallet.address, json.dumps(tx))
         assert v.get('complexity', None) == 2
         
 
