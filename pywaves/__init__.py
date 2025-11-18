@@ -49,7 +49,6 @@ ADDRESS_CHECKSUM_LENGTH = 4
 ADDRESS_HASH_LENGTH = 20
 ADDRESS_LENGTH = 1 + 1 + ADDRESS_CHECKSUM_LENGTH + ADDRESS_HASH_LENGTH
 
-
 class PyWavesException(Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -112,7 +111,7 @@ class PyWaves(object):
     def setMatcher(self, node=None):
         if node is None:
             node = 'https://matcher.waves.exchange'
-        node = node.rstrip("/")
+        self.NODE = node.rstrip("/")
         self.MATCHER = node
         try:
             self.MATCHER_PUBLICKEY = self.wrapper('/matcher', host=node)
@@ -123,9 +122,7 @@ class PyWaves(object):
     def setDatafeed(self, node=None):
         if node is None:
             node = 'https://api.wavesplatform.com'
-        else:
-            node = node.rstrip("/")
-        
+        self.NODE = node.rstrip("/")        
         self.DATAFEED = node
         logging.info('Setting datafeed %s ' % (self.DATAFEED))
 
