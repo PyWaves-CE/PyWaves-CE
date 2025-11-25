@@ -108,22 +108,21 @@ class PyWaves(object):
     def getNode(self):
         return self.NODE
 
-    def setMatcher(self, node=None):
-        if node is None:
-            node = 'https://matcher.waves.exchange'
-        self.NODE = node.rstrip("/")
-        self.MATCHER = node
+    
+    def setMatcher(self, matcher = None):
+        if matcher is None:
+            matcher = 'https://matcher.waves.exchange'
         try:
-            self.MATCHER_PUBLICKEY = self.wrapper('/matcher', host=node)
+            self.MATCHER_PUBLICKEY = wrapper('/matcher', host = matcher)
+            self.MATCHER = matcher
             logging.info('Setting matcher %s %s' % (self.MATCHER, self.MATCHER_PUBLICKEY))
         except:
             self.MATCHER_PUBLICKEY = ''
 
-    def setDatafeed(self, node=None):
-        if node is None:
-            node = 'https://api.wavesplatform.com'
-        self.NODE = node.rstrip("/")        
-        self.DATAFEED = node
+    def setDatafeed(self, df = None):
+        if df is None:
+            df = 'https://api.wavesplatform.com'
+        self.DATAFEED = df.rstrip("/")
         logging.info('Setting datafeed %s ' % (self.DATAFEED))
 
     def getDatafeed(self):
@@ -375,11 +374,11 @@ def setNode(node = None, chain = None, chain_id = None):
 def getNode():
     return _pw_instance.getNode()
 
-def setMatcher(node=None):
-    _pw_instance.setMatcher(node)
+def setMatcher(matcher=None):
+    _pw_instance.setMatcher(matcher)
 
-def setDatafeed(node=None):
-    _pw_instance.setDatafeed(node)
+def setDatafeed(df=None):
+    _pw_instance.setDatafeed(df)
 
 def getDatafeed():
     return _pw_instance.getDatafeed()
