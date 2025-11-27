@@ -124,6 +124,7 @@ class PyWaves(object):
             node = 'https://api.wavesplatform.com'
         self.DATAFEED = node.rstrip("/")
         logging.info('Setting datafeed %s ' % (self.DATAFEED))
+    
     def getDatafeed(self):
         return self.DATAFEED
 
