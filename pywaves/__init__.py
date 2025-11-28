@@ -422,6 +422,12 @@ def b58decode(data):
 def waitFor(id, timeout=30, hard_timeout=False):
     return _pw_instance.waitFor(id, timeout, hard_timeout)
 
+def evaluateScript(address, script):
+    return _pw_instance.evaluateScript(address, script)
+             
+def validateTx(tx):
+    return _pw_instance.validateTx(tx)
+
 def __getattr__(name):
     """Delegates module attribute access to PyWaves instance"""
     if hasattr(_pw_instance, name):
