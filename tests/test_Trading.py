@@ -32,6 +32,13 @@ try:
             testwallet.cancelOrder(A_B, notExistingOrder)
 
         assert str(error.value) == 'Order not found'
+    
+    def test_tradableBalance():
+        tradableBalance = testwallet.tradableBalance(A_B)
+        A_balance = testwallet.balance(assetId=tokens[0])
+        B_balance = testwallet.balance()
+
+        assert tradableBalance == (A_balance, B_balance)        
 
     def test_deleteOrderFilled():
         order1 = testwallet.sell(A_B, amount=1, price=1, maxLifetime=15*86400)
@@ -78,12 +85,7 @@ try:
         time.sleep(1)
         assert order.status() == 'Cancelled'
 
-    def test_tradableBalance():
-        tradableBalance = testwallet.tradableBalance(A_B)
-        A_balance = testwallet.balance(assetId=tokens[0])
-        B_balance = testwallet.balance()
 
-        assert tradableBalance == (A_balance, B_balance)
 
     def test_tradesLimit():
         trades = A_B.trades(10)

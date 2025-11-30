@@ -59,7 +59,7 @@ class Helpers:
         print(f"Testwallet balance: {testwalletBalance}")
     
         res = testwallet.script()
-        print(res)
+        #print(res)
         if (res['script'] != None):
             txFee = 400000+100000
         else:
@@ -69,7 +69,7 @@ class Helpers:
         if (amount > 0):
             print(f"Sending...")
             tx = testwallet.sendWaves(faucet, amount, txFee=txFee)
-            print(tx)
+            #print(tx)
             pw.waitFor(tx['id'])
 
 

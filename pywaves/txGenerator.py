@@ -377,3 +377,4 @@ class TxGenerator:
             }
 
         return tx
+

@@ -124,7 +124,7 @@ class PyWaves(object):
             node = 'https://api.wavesplatform.com'
         self.DATAFEED = node.rstrip("/")
         logging.info('Setting datafeed %s ' % (self.DATAFEED))
-
+    
     def getDatafeed(self):
         return self.DATAFEED
 
@@ -204,6 +204,12 @@ class PyWaves(object):
 
     def stateChangesForAddress(self, address, limit = 1000):
         return self.wrapper('/debug/stateChanges/address/' + address + '/limit/' + str(limit))
+
+    def evaluateScript(self, address, script):
+        return self.wrapper('/utils/script/evaluate/%s' % address, postData=script)
+    
+    def validateTx(self, tx):
+        return self.wrapper('/debug/validate', postData=tx)
 
     def getOrderBook(self, assetPair):
         orderBook = assetPair.orderbook()
@@ -368,11 +374,11 @@ def setNode(node = None, chain = None, chain_id = None):
 def getNode():
     return _pw_instance.getNode()
 
-def setMatcher(node=None):
-    _pw_instance.setMatcher(node)
+def setMatcher(matcher=None):
+    _pw_instance.setMatcher(matcher)
 
-def setDatafeed(node=None):
-    _pw_instance.setDatafeed(node)
+def setDatafeed(df=None):
+    _pw_instance.setDatafeed(df)
 
 def getDatafeed():
     return _pw_instance.getDatafeed()
@@ -415,6 +421,12 @@ def b58decode(data):
 
 def waitFor(id, timeout=30, hard_timeout=False):
     return _pw_instance.waitFor(id, timeout, hard_timeout)
+
+def evaluateScript(address, script):
+    return _pw_instance.evaluateScript(address, script)
+             
+def validateTx(tx):
+    return _pw_instance.validateTx(tx)
 
 def __getattr__(name):
     """Delegates module attribute access to PyWaves instance"""
