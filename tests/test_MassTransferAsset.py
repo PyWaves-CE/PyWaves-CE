@@ -6,6 +6,7 @@ import pytest
 import os
 import random
 import string
+import datetime
 
 PYWAVES_TEST_SECRET = os.getenv('PYWAVES_TEST_SECRET')
 helpers = Helpers()
@@ -55,6 +56,21 @@ try:
             myAddress.massTransferAssets(transfers, myToken)
 
         assert str(error.value) == 'Private key required'
+
+
+    def test_assetMassTransferWithAttachment():
+        transfers = [
+            {'recipient': recipient1.address, 'amount': 10000},
+            {'recipient': recipient2.address, 'amount': 10000}
+        ]
+        
+        now = datetime.datetime.now()
+        attachment = 'test attachment-' + str(now)
+        tx = testwallet.massTransferAssets(transfers, myToken, attachment=attachment)
+        blockchainTx = pw.waitFor(tx['id'])
+
+        assert blockchainTx['id'] == tx['id']
+        assert blockchainTx['attachment'] == pw.b58encode(attachment.encode('utf-8'))
 
     def test_assetMassTransferWithTooMuchRecipients():    
         transfers = [
