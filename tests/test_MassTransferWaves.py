@@ -4,6 +4,7 @@ from pywaves import address
 from pywaves import asset
 import pytest
 import os
+import datetime
 
 helpers = Helpers()
 
@@ -54,6 +55,20 @@ try:
         blockchainTx = pw.waitFor(tx['id'])
 
         assert blockchainTx['id'] == tx['id']
+
+    def test_massTransferWithAttachment():
+        transfers = [
+            {'recipient': recipient1.address, 'amount': 10000},
+            {'recipient': recipient2.address, 'amount': 10000}
+        ]
+        
+        now = datetime.datetime.now()
+        attachment = 'test attachment-' + str(now)
+        tx = testwallet.massTransferWaves(transfers, attachment=attachment)
+        blockchainTx = pw.waitFor(tx['id'])
+
+        assert blockchainTx['id'] == tx['id']
+        assert blockchainTx['attachment'] == pw.b58encode(attachment.encode('utf-8'))
 
     def test_MassTransferWithTooMuchRecipients():
         transfers = [
