@@ -262,9 +262,7 @@ class TxSigner:
         massTransferTx.asset_id = pw.b58decode(tx['assetId'])
 
         if 'attachment' in tx and tx['attachment'] != '':
-            attachment = transaction_pb2.Attachment()
-            attachment.string_value = pw.b58decode(tx['attachment'])
-            massTransferTx.attachment.CopyFrom(attachment)
+            massTransferTx.attachment = pw.b58decode(tx['attachment'])
 
         for transfer in tx['transfers']:
             recipient = recipient_pb2.Recipient()
@@ -273,6 +271,7 @@ class TxSigner:
             transferObject.recipient.CopyFrom(recipient)
             transferObject.amount = transfer['amount']
             massTransferTx.transfers.append(transferObject)
+
         txFee = amount_pb2.Amount()
         txFee.amount = tx['fee']
         transaction = transaction_pb2.Transaction()
@@ -291,10 +290,8 @@ class TxSigner:
         massTransferTx.asset_id = pw.b58decode(tx['assetId'])
 
         if 'attachment' in tx and tx['attachment'] != '':
-            attachment = transaction_pb2.Attachment()
-            attachment.string_value = pw.b58decode(tx['attachment'])
-            massTransferTx.attachment.CopyFrom(attachment)
-
+            massTransferTx.attachment = pw.b58decode(tx['attachment'])
+            
         for transfer in tx['transfers']:
             recipient = recipient_pb2.Recipient()
             recipient.public_key_hash = pw.b58decode(transfer['recipient'])[2:22]
@@ -302,6 +299,7 @@ class TxSigner:
             transferObject.recipient.CopyFrom(recipient)
             transferObject.amount = transfer['amount']
             massTransferTx.transfers.append(transferObject)
+            
         txFee = amount_pb2.Amount()
         txFee.amount = tx['fee']
         transaction = transaction_pb2.Transaction()
